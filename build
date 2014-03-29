@@ -1,0 +1,37 @@
+#!/bin/sh
+
+wss=webscalesql  # long name, too much typing
+wss_version=5.6
+wss_src_dir=${wss}-${wss_version}
+tarball=${wss}-${wss_version}.tar.gz
+
+# other stuff
+git_src_dir=~/git
+rpm_src_dir=~/RPM/SRC/$wss
+
+
+# create directories if missing
+for d in $rpm_src_dir; do
+	if test -d $d; then
+		echo "OK: Directory $d exists"
+	else
+		echo "Creating directory $d"
+		mkdir $d
+	fi
+done
+
+# copy spec file
+if test -e $rpm_src_dir/$wss_spec && cmp -s $wss.spec $rpm_src_dir/$wss.spec; then
+	echo "OK: spec file $wss.spec is up to date"
+else
+	echo "Copying spec file $wss.spec to $rpm_src_dir"
+	cp -p $wss.spec $rpm_src_dir/
+fi
+
+if test -e $rpm_src_dir/$tarball; then
+	echo "OK: tar ball $tarball found in $rpm_src_dir"
+else
+	# build the tar ball if missing
+	echo "Creating tar ball $tarball in $rpm_src_dir from $git_src_dir/${wss_src_dir}"
+	( cd $git_src_dir && tar cz --exclude-vcs -f $rpm_src_dir/$tarball ${wss_src_dir} )
+fi
