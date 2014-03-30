@@ -80,7 +80,7 @@
 # Source name
 # ----------------------------------------------------------------------------
 %if %{undefined src_base}
-%define src_base mysql
+%define src_base webscalesql
 %endif
 %define src_dir %{src_base}-%{mysql_version}
 
@@ -169,8 +169,8 @@
             %if "%rhelver" == "6"
               %define distro_description    Red Hat Enterprise Linux 6
               %define distro_releasetag     rhel6
-              %define distro_buildreq       gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel
-              %define distro_requires       chkconfig coreutils grep procps shadow-utils net-tools
+              %define distro_buildreq       gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
+              %define distro_requires       chkconfig coreutils grep procps shadow-utils net-tools readline
             %else
               %{error:Red Hat Enterprise Linux %{rhelver} is unsupported}
             %endif

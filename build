@@ -35,3 +35,18 @@ else
 	echo "Creating tar ball $tarball in $rpm_src_dir from $git_src_dir/${wss_src_dir}"
 	( cd $git_src_dir && tar cz --exclude-vcs -f $rpm_src_dir/$tarball ${wss_src_dir} )
 fi
+
+cd $rpm_src_dir
+
+# now do the real build.
+
+echo "Building webscalesql..."
+MYSQL_BUILD_PATH=/opt/centos/devtoolset-1.1/root/usr/bin:$PATH \
+MYSQL_BUILD_CC=/opt/centos/devtoolset-1.1/root/usr/bin/gcc \
+MYSQL_BUILD_CXX=/opt/centos/devtoolset-1.1/root/usr/bin/c++ \
+MYSQL_BUILD_CFLAGS= \
+MYSQL_BUILD_CXXFLAGS= \
+MYSQL_BUILD_LDFLAGS= \
+MYSQL_BUILD_CMAKE= \
+MYSQL_BUILD_MAKE_JFLAG= \
+rpmbuild -ba $wss.spec
