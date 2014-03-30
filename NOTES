@@ -1,8 +1,63 @@
+Changes made so this can be built on CentOS 6 using a spec file taken from
+MySQL 5.6.17 (old style rpms on http://dev.mysql.com/downloads/mysql/
+
+1. webscalesql requires a new GCC so install the new toolset:
 
 http://people.centos.org/tru/devtools-1.1/readme says:
 
-wget http://people.centos.org/tru/devtools-1.1/devtools-1.1.repo -O /etc/yum.repos.d/devtools-1.1.repo
-yum install devtoolset-1.1
-scl enable devtoolset-1.1 bash
-gcc -v
-wget http://people.centos.org/tru/devtools-1.1/devtools-1.1.repo -O /etc/yum.repos.d/devtools-1.1.repo
+sudo wget http://people.centos.org/tru/devtools-1.1/devtools-1.1.repo -O /etc/yum.repos.d/devtools-1.1.repo
+sudo yum install devtoolset-1.1
+
+# check it looks good.
+
+$ scl enable devtoolset-1.1 bash  # notice this just changes the path.
+$ gcc -v                          # show that the new gcc is visible
+Using built-in specs.
+COLLECT_GCC=gcc
+COLLECT_LTO_WRAPPER=/opt/centos/devtoolset-1.1/root/usr/libexec/gcc/x86_64-redhat-linux/4.7.2/lto-wrapper
+Target: x86_64-redhat-linux
+Configured with: ../configure --prefix=/opt/centos/devtoolset-1.1/root/usr --mandir=/opt/centos/devtoolset-1.1/root/usr/share/man --infodir=/opt/centos/devtoolset-1.1/root/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --disable-build-with-cxx --disable-build-poststage1-with-cxx --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --enable-languages=c,c++,fortran,lto --enable-plugin --with-linker-hash-style=gnu --enable-initfini-array --disable-libgcj --with-ppl --with-cloog --with-mpc=/home/centos/rpm/BUILD/gcc-4.7.2-20121015/obj-x86_64-redhat-linux/mpc-install --with-tune=generic --with-arch_32=i686 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 4.7.2 20121015 (Red Hat 4.7.2-5) (GCC) 
+
+2. extract spec file with rpm -ivh MySQL-5.6.14-1.el6.src.rpm
+
+3. get my repo....
+
+4. my rpm setup is a bit weird (sorry) but is based on the OpenPKG setup
+which I liked:
+
+$ cat ~/.rpmmacros 
+%_topdir        %(echo $HOME)/RPM
+%_sourcedir     %{_topdir}/SRC/%{name}
+%_specdir       %{_topdir}/SRC/%{name}
+%_tmppath       %{_topdir}/TMP
+%_builddir      %{_topdir}/TMP
+%_rpmdir        %{_topdir}/PKG
+%_srcrpmdir     %{_topdir}/PKG
+%_buildroot     %{_topdir}/TMP/%{name}-%{version}-root
+%_rpmfilename   %{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm
+%tmpdir		%{_topdir}/TMP
+%packager       %(echo ${USER}@)%(hostname)
+%distribution   Personal Build
+
+# GNU GPG config below
+%_signature     gpg
+%_gpg_name      Simon J Mudd <sjmudd@pobox.com>
+%_gpg_path      %(echo $HOME)/.gnupg
+
+%debug_package %{nil}
+
+
+broken because:
+
+Wrote: /home/sjmudd/RPM/PKG/webscalesql-5.6-1.linux_glibc2.12.src.rpm
+Wrote: /home/sjmudd/RPM/PKG/MySQL-server-5.6-1.linux_glibc2.12.x86_64.rpm
+Wrote: /home/sjmudd/RPM/PKG/MySQL-client-5.6-1.linux_glibc2.12.x86_64.rpm
+Wrote: /home/sjmudd/RPM/PKG/MySQL-test-5.6-1.linux_glibc2.12.x86_64.rpm
+Wrote: /home/sjmudd/RPM/PKG/MySQL-devel-5.6-1.linux_glibc2.12.x86_64.rpm
+Wrote: /home/sjmudd/RPM/PKG/MySQL-shared-5.6-1.linux_glibc2.12.x86_64.rpm
+Wrote: /home/sjmudd/RPM/PKG/MySQL-embedded-5.6-1.linux_glibc2.12.x86_64.rpm
+
+(1) package names
+(2) no rhel6 type thing

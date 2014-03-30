@@ -25,13 +25,15 @@
 %global mysql_vendor_1          Oracle and/or its affiliates
 %global mysql_vendor            webscalesql.org
 
+# 5.6 for now
 %global mysql_version   5.6
 
 %global mysqld_user     mysql
 %global mysqld_group    mysql
 %global mysqldatadir    /var/lib/mysql
 
-%global release         1  
+# this matches the last commit in git. Need to automate this
+%global release         0.20140317.155729
 
 
 #
@@ -287,7 +289,7 @@ regardless of what they are currently working on.
 # Sub package definition
 ##############################################################################
 
-%package -n MySQL-server%{product_suffix}
+%package -n webscalesql-server%{product_suffix}
 Summary:        MySQL: a very fast and reliable SQL database server
 Group:          Applications/Databases
 Requires:       %{distro_requires}
@@ -303,7 +305,7 @@ Obsoletes:      MySQL-server-advanced-gpl MySQL-server-enterprise-gpl
 Provides:       mysql-server = %{version}-%{release}
 Provides:       mysql-server%{?_isa} = %{version}-%{release}
 
-%description -n MySQL-server%{product_suffix}
+%description -n webscalesql-server%{product_suffix}
 The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
 and robust SQL (Structured Query Language) database server. MySQL Server
 is intended for mission-critical, heavy-load production systems as well
@@ -325,10 +327,10 @@ This package includes the MySQL server binary as well as related utilities
 to run and administer a MySQL server.
 
 If you want to access and work with the database, you have to install
-package "MySQL-client%{product_suffix}" as well!
+package "webscalesql-client%{product_suffix}" as well!
 
 # ----------------------------------------------------------------------------
-%package -n MySQL-client%{product_suffix}
+%package -n webscalesql-client%{product_suffix}
 Summary:        MySQL - Client
 Group:          Applications/Databases
 %if 0%{?commercial}
@@ -343,20 +345,20 @@ Obsoletes:      MySQL-client-advanced-gpl MySQL-client-enterprise-gpl
 Provides:       mysql = %{version}-%{release} 
 Provides:       mysql%{?_isa} = %{version}-%{release}
 
-%description -n MySQL-client%{product_suffix}
+%description -n webscalesql-client%{product_suffix}
 This package contains the standard MySQL clients and administration tools.
 
 For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
 
 # ----------------------------------------------------------------------------
-%package -n MySQL-test%{product_suffix}
+%package -n webscalesql-test%{product_suffix}
 Summary:        MySQL - Test suite
 Group:          Applications/Databases
 %if 0%{?commercial}
 Requires:       MySQL-client-advanced perl
 Obsoletes:      MySQL-test
 %else
-Requires:       MySQL-client perl
+Requires:       webscalesql-client perl
 Obsoletes:      MySQL-test-advanced
 %endif
 Obsoletes:      mysql-test < %{version}-%{release}
@@ -367,13 +369,13 @@ Provides:       mysql-test = %{version}-%{release}
 Provides:       mysql-test%{?_isa} = %{version}-%{release}
 AutoReqProv:    no
 
-%description -n MySQL-test%{product_suffix}
+%description -n webscalesql-test%{product_suffix}
 This package contains the MySQL regression test suite.
 
 For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
 
 # ----------------------------------------------------------------------------
-%package -n MySQL-devel%{product_suffix}
+%package -n webscalesql-devel%{product_suffix}
 Summary:        MySQL - Development header files and libraries
 Group:          Applications/Databases
 %if 0%{?commercial}
@@ -388,14 +390,14 @@ Obsoletes:      MySQL-devel-advanced-gpl MySQL-devel-enterprise-gpl
 Provides:       mysql-devel = %{version}-%{release}
 Provides:       mysql-devel%{?_isa} = %{version}-%{release}
 
-%description -n MySQL-devel%{product_suffix}
+%description -n webscalesql-devel%{product_suffix}
 This package contains the development header files and libraries necessary
 to develop MySQL client applications.
 
 For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
 
 # ----------------------------------------------------------------------------
-%package -n MySQL-shared%{product_suffix}
+%package -n webscalesql-shared%{product_suffix}
 Summary:        MySQL - Shared libraries
 Group:          Applications/Databases
 %if 0%{?commercial}
@@ -409,19 +411,19 @@ Obsoletes:      MySQL-shared-pro-gpl-cert
 Obsoletes:      MySQL-shared-classic MySQL-shared-community MySQL-shared-enterprise
 Obsoletes:      MySQL-shared-advanced-gpl MySQL-shared-enterprise-gpl
 
-%description -n MySQL-shared%{product_suffix}
+%description -n webscalesql-shared%{product_suffix}
 This package contains the shared libraries (*.so*) which certain languages
 and applications need to dynamically load and use MySQL.
 
 # ----------------------------------------------------------------------------
-%package -n MySQL-embedded%{product_suffix}
+%package -n webscalesql-embedded%{product_suffix}
 Summary:        MySQL - Embedded library
 Group:          Applications/Databases
 %if 0%{?commercial}
 Requires:       MySQL-devel-advanced
 Obsoletes:      MySQL-embedded
 %else
-Requires:       MySQL-devel
+Requires:       webscalesql-devel
 Obsoletes:      MySQL-embedded-advanced
 %endif
 Obsoletes:      mysql-embedded < %{version}-%{release}
@@ -432,7 +434,7 @@ Obsoletes:      MySQL-embedded-advanced-gpl MySQL-embedded-enterprise-gpl
 Provides:       mysql-embedded = %{version}-%{release}
 Provides:       mysql-emdedded%{?_isa} = %{version}-%{release}
 
-%description -n MySQL-embedded%{product_suffix}
+%description -n webscalesql-embedded%{product_suffix}
 This package contains the MySQL server as an embedded library.
 
 The embedded MySQL server library makes it possible to run a full-featured
@@ -610,7 +612,7 @@ install -m 644 "%{malloc_lib_source}" \
 #  Post processing actions, i.e. when installed
 ##############################################################################
 
-%pre -n MySQL-server%{product_suffix}
+%pre -n webscalesql-server%{product_suffix}
 # This is the code running at the beginning of a RPM upgrade action,
 # before replacing the old files with the new ones.
 
@@ -696,7 +698,7 @@ A manual upgrade is required.
 
   You may choose to use 'rpm --nodeps -ev <package-name>' to remove
   the package which contains the mysqlclient shared library.  The
-  library will be reinstalled by the MySQL-shared-compat package.
+  library will be reinstalled by the webscalesql-shared-compat package.
 - Install the new MySQL packages supplied by $myvendor
 - Ensure that the MySQL server is started
 - Run the 'mysql_upgrade' program
@@ -788,7 +790,7 @@ if [ -x %{_sysconfdir}/init.d/mysql ] ; then
         sleep 5
 fi
 
-%post -n MySQL-server%{product_suffix}
+%post -n webscalesql-server%{product_suffix}
 # This is the code running at the end of a RPM install or upgrade action,
 # after the (new) files have been written.
 
@@ -948,7 +950,7 @@ mv -f  $STATUS_FILE ${STATUS_FILE}-LAST  # for "triggerpostun"
 #scheduled service packs and more.  Visit www.mysql.com/enterprise for more
 #information."
 
-%preun -n MySQL-server%{product_suffix}
+%preun -n webscalesql-server%{product_suffix}
 
 # Which '$1' does this refer to?  Fedora docs have info:
 # " ... a count of the number of versions of the package that are installed.
@@ -977,7 +979,7 @@ fi
 # We do not remove the mysql user since it may still own a lot of
 # database files.
 
-%triggerpostun -n MySQL-server%{product_suffix} --MySQL-server-community
+%triggerpostun -n webscalesql-server%{product_suffix} --MySQL-server-community
 
 # Setup: We renamed this package, so any existing "server-community"
 #   package will be removed when this "server" is installed.
@@ -1048,7 +1050,7 @@ echo "====="                                     >> $STATUS_HISTORY
 #  Files section
 ##############################################################################
 
-%files -n MySQL-server%{product_suffix} -f release/support-files/plugins.files
+%files -n webscalesql-server%{product_suffix} -f release/support-files/plugins.files
 %defattr(-,root,root,0755)
 
 %if %{defined license_files_server}
@@ -1135,7 +1137,7 @@ echo "====="                                     >> $STATUS_HISTORY
 %attr(755, root, root) %{_datadir}/mysql/
 
 # ----------------------------------------------------------------------------
-%files -n MySQL-client%{product_suffix}
+%files -n webscalesql-client%{product_suffix}
 
 %defattr(-, root, root, 0755)
 %attr(755, root, root) %{_bindir}/msql2mysql
@@ -1169,7 +1171,7 @@ echo "====="                                     >> $STATUS_HISTORY
 %doc %attr(644, root, man) %{_mandir}/man1/mysql_config_editor.1*
 
 # ----------------------------------------------------------------------------
-%files -n MySQL-devel%{product_suffix} -f optional-files-devel
+%files -n webscalesql-devel%{product_suffix} -f optional-files-devel
 %defattr(-, root, root, 0755)
 %doc %attr(644, root, man) %{_mandir}/man1/comp_err.1*
 %doc %attr(644, root, man) %{_mandir}/man1/mysql_config.1*
@@ -1183,19 +1185,19 @@ echo "====="                                     >> $STATUS_HISTORY
 %{_libdir}/mysql/libmysqlservices.a
 
 # ----------------------------------------------------------------------------
-%files -n MySQL-shared%{product_suffix}
+%files -n webscalesql-shared%{product_suffix}
 %defattr(-, root, root, 0755)
 # Shared libraries (omit for architectures that don't support them)
 %{_libdir}/libmysql*.so*
 
-%post -n MySQL-shared%{product_suffix}
+%post -n webscalesql-shared%{product_suffix}
 /sbin/ldconfig
 
-%postun -n MySQL-shared%{product_suffix}
+%postun -n webscalesql-shared%{product_suffix}
 /sbin/ldconfig
 
 # ----------------------------------------------------------------------------
-%files -n MySQL-test%{product_suffix}
+%files -n webscalesql-test%{product_suffix}
 %defattr(-, root, root, 0755)
 %attr(-, root, root) %{_datadir}/mysql-test
 %attr(755, root, root) %{_bindir}/mysql_client_test
@@ -1208,7 +1210,7 @@ echo "====="                                     >> $STATUS_HISTORY
 %doc %attr(644, root, man) %{_mandir}/man1/mysqltest_embedded.1*
 
 # ----------------------------------------------------------------------------
-%files -n MySQL-embedded%{product_suffix}
+%files -n webscalesql-embedded%{product_suffix}
 %defattr(-, root, root, 0755)
 %attr(755, root, root) %{_bindir}/mysql_embedded
 %attr(644, root, root) %{_libdir}/mysql/libmysqld.a
@@ -1220,6 +1222,9 @@ echo "====="                                     >> $STATUS_HISTORY
 # merging BK trees)
 ##############################################################################
 %changelog
+* Sun Mar 30 2014 Simon J Mudd <sjmudd@pobox.com>
+- Convert MySQL spec file to webscalesql spec file
+
 * Wed Oct 30 2013 Balasubramanian Kandasamy <balasubramanian.kandasamy@oracle.com>
 - Removed non gpl file docs/mysql.info from community packages
 

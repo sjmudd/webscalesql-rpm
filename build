@@ -36,9 +36,14 @@ else
 	( cd $git_src_dir && tar cz --exclude-vcs -f $rpm_src_dir/$tarball ${wss_src_dir} )
 fi
 
+# get current location
+mydir=$PWD
+# move to build directory
 cd $rpm_src_dir
 
 # now do the real build.
+logfile=$mydir/build.log.$(date +%Y%m%d.%H%M%S)
+echo "Logging to $logfile"
 
 echo "Building webscalesql..."
 MYSQL_BUILD_PATH=/opt/centos/devtoolset-1.1/root/usr/bin:$PATH \
@@ -49,4 +54,11 @@ MYSQL_BUILD_CXXFLAGS= \
 MYSQL_BUILD_LDFLAGS= \
 MYSQL_BUILD_CMAKE= \
 MYSQL_BUILD_MAKE_JFLAG= \
-rpmbuild -ba $wss.spec
+rpmbuild -ba --define "distro_specific 1" $wss.spec 2>&1 | tee -a $logfile
+rc=$?
+test -f $logfile && gzip -9 $logfile
+if [ $rc = 0 ]; then
+	echo "Build completed successfully"
+else
+	echo "Build failed"
+fi
