@@ -49,15 +49,7 @@ $ cat ~/.rpmmacros
 %debug_package %{nil}
 
 
-broken because:
+5. to build
 
-Wrote: /home/sjmudd/RPM/PKG/webscalesql-5.6-1.linux_glibc2.12.src.rpm
-Wrote: /home/sjmudd/RPM/PKG/MySQL-server-5.6-1.linux_glibc2.12.x86_64.rpm
-Wrote: /home/sjmudd/RPM/PKG/MySQL-client-5.6-1.linux_glibc2.12.x86_64.rpm
-Wrote: /home/sjmudd/RPM/PKG/MySQL-test-5.6-1.linux_glibc2.12.x86_64.rpm
-Wrote: /home/sjmudd/RPM/PKG/MySQL-devel-5.6-1.linux_glibc2.12.x86_64.rpm
-Wrote: /home/sjmudd/RPM/PKG/MySQL-shared-5.6-1.linux_glibc2.12.x86_64.rpm
-Wrote: /home/sjmudd/RPM/PKG/MySQL-embedded-5.6-1.linux_glibc2.12.x86_64.rpm
-
-(1) package names
-(2) no rhel6 type thing
+$ sh build 
+# will take a while and leave a log file in build.log.<timestamp>.gz
