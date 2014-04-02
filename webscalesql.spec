@@ -14,6 +14,15 @@
 # Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston
 # MA  02110-1301  USA.
 
+# NOTE:
+# This spec file is based on the MySQL spec file provided by Oracle
+# and used to build MySQL rpms, but modified to build webscalesql.
+#
+# See http:://webscalesql.org/ for more information on WebScaleSQL
+# or my blog site for any updates to this spec file: http://blog.wl0.org/.
+#
+# Simon J Mudd <sjmudd@pobox.com>
+
 ##############################################################################
 # Some common macro definitions
 ##############################################################################
@@ -32,9 +41,8 @@
 %global mysqld_group    mysql
 %global mysqldatadir    /var/lib/mysql
 
-# this matches the last commit in git. Need to automate this
-%global release         0.20140317.155729
-
+# This should match the last commit timestamp in git in format 0.yyyymmdd.hhmmss
+%global release         0.20140327.145247
 
 #
 # Macros we use which are not available in all supported versions of RPM
@@ -70,13 +78,6 @@
 #
 #   $ rpmbuild --define="option <x>" ...
 #
-
-# ----------------------------------------------------------------------------
-# Commercial builds
-# ----------------------------------------------------------------------------
-%if %{undefined commercial}
-%define commercial 0
-%endif
 
 # ----------------------------------------------------------------------------
 # Source name
@@ -148,8 +149,8 @@
       %if "%elver" == "6"
         %define distro_description      Oracle Linux 6
         %define distro_releasetag       el6
-        %define distro_buildreq         gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel
-        %define distro_requires         chkconfig coreutils grep procps shadow-utils net-tools
+        %define distro_buildreq         gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
+        %define distro_requires         chkconfig coreutils grep procps shadow-utils net-tools readline
       %else
         %{error:Oracle Linux %{elver} is unsupported}
       %endif
@@ -230,25 +231,20 @@
 # Configuration based upon above user input, not to be set directly
 ##############################################################################
 
-%if 0%{?commercial}
-%define license_files_server    %{src_dir}/LICENSE.mysql
-%define license_type            Commercial
-%else
 %define license_files_server    %{src_dir}/COPYING %{src_dir}/README
 %define license_type            GPL
-%endif
 
 ##############################################################################
 # Main spec file section
 ##############################################################################
 
 Name:           webscalesql%{product_suffix}
-Summary:        webscalesql: a very fast and reliable SQL database server
+Summary:        WebScaleSQL: a very fast and reliable SQL database server
 Group:          Applications/Databases
 Version:        %{mysql_version}
 Release:        %{release}%{?distro_releasetag:.%{distro_releasetag}}
 Distribution:   %{distro_description}
-License:        GPL v2 (I think, check and fix)
+License:        GPL v2
 Source:         webscalesql-%{mysql_version}.tar.gz
 URL:            http://www.webscalesql.org/
 Packager:       Simon J Mudd <sjmudd@pobox.com>
@@ -262,7 +258,7 @@ BuildRequires:  %{distro_buildreq}
 # run a rm -rf
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 
-# From the manual
+# From the WebScaleSQL page
 %description
 WebScaleSQL is a collaboration among engineers from several companies
 that face similar challenges in running MySQL at scale, and seek greater
@@ -290,14 +286,11 @@ regardless of what they are currently working on.
 ##############################################################################
 
 %package -n webscalesql-server%{product_suffix}
-Summary:        MySQL: a very fast and reliable SQL database server
+Summary:        WebScaleSQL: a very fast and reliable SQL database server
 Group:          Applications/Databases
 Requires:       %{distro_requires}
-%if 0%{?commercial}
 Obsoletes:      MySQL-server
-%else
 Obsoletes:      MySQL-server-advanced
-%endif
 Obsoletes:      mysql-server < %{version}-%{release}
 Obsoletes:      mysql-server-advanced
 Obsoletes:      MySQL-server-classic MySQL-server-community MySQL-server-enterprise
@@ -306,38 +299,24 @@ Provides:       mysql-server = %{version}-%{release}
 Provides:       mysql-server%{?_isa} = %{version}-%{release}
 
 %description -n webscalesql-server%{product_suffix}
-The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
-and robust SQL (Structured Query Language) database server. MySQL Server
-is intended for mission-critical, heavy-load production systems as well
-as for embedding into mass-deployed software. MySQL is a trademark of
-%{mysql_vendor}
+WebScaleSQL provides a fast SQL database server based on MySQL.
 
-The MySQL software has Dual Licensing, which means you can use the MySQL
-software free of charge under the GNU General Public License
-(http://www.gnu.org/licenses/). You can also purchase commercial MySQL
-licenses from %{mysql_vendor} if you do not wish to be bound by the terms of
-the GPL. See the chapter "Licensing and Support" in the manual for
-further info.
-
-The MySQL web site (http://www.mysql.com/) provides the latest news and
-information about the MySQL software.  Also please see the documentation
+The WebScaleSQL web site (http://webscalesql.org/) provides the latest news and
+information about the WebScaleSQL software.  Also please see the documentation
 and the manual for more information.
 
-This package includes the MySQL server binary as well as related utilities
-to run and administer a MySQL server.
+This package includes the WebScaleSQL server binary as well as related utilities
+to run and administer a WebScaleSQL server.
 
 If you want to access and work with the database, you have to install
 package "webscalesql-client%{product_suffix}" as well!
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-client%{product_suffix}
-Summary:        MySQL - Client
+Summary:        WebScaleSQL - Client
 Group:          Applications/Databases
-%if 0%{?commercial}
 Obsoletes:      MySQL-client
-%else
 Obsoletes:      MySQL-client-advanced
-%endif
 Obsoletes:      mysql < %{version}-%{release}
 Obsoletes:      mysql-advanced < %{version}-%{release}
 Obsoletes:      MySQL-client-classic MySQL-client-community MySQL-client-enterprise
@@ -346,21 +325,17 @@ Provides:       mysql = %{version}-%{release}
 Provides:       mysql%{?_isa} = %{version}-%{release}
 
 %description -n webscalesql-client%{product_suffix}
-This package contains the standard MySQL clients and administration tools.
+This package contains the standard WebScaleSQL clients and administration tools.
 
-For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
+For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-test%{product_suffix}
-Summary:        MySQL - Test suite
+Summary:        WebScaleSQL - Test suite
 Group:          Applications/Databases
-%if 0%{?commercial}
-Requires:       MySQL-client-advanced perl
-Obsoletes:      MySQL-test
-%else
 Requires:       webscalesql-client perl
+Obsoletes:      MySQL-test
 Obsoletes:      MySQL-test-advanced
-%endif
 Obsoletes:      mysql-test < %{version}-%{release}
 Obsoletes:      mysql-test-advanced
 Obsoletes:      MySQL-test-classic MySQL-test-community MySQL-test-enterprise
@@ -370,19 +345,16 @@ Provides:       mysql-test%{?_isa} = %{version}-%{release}
 AutoReqProv:    no
 
 %description -n webscalesql-test%{product_suffix}
-This package contains the MySQL regression test suite.
+This package contains the WebScaleSQL regression test suite.
 
-For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
+For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-devel%{product_suffix}
-Summary:        MySQL - Development header files and libraries
+Summary:        WebScaleSQL - Development header files and libraries
 Group:          Applications/Databases
-%if 0%{?commercial}
 Obsoletes:      MySQL-devel
-%else
 Obsoletes:      MySQL-devel-advanced
-%endif
 Obsoletes:      mysql-devel < %{version}-%{release}
 Obsoletes:      mysql-embedded-devel mysql-devel-advanced mysql-embedded-devel-advanced
 Obsoletes:      MySQL-devel-classic MySQL-devel-community MySQL-devel-enterprise
@@ -392,19 +364,16 @@ Provides:       mysql-devel%{?_isa} = %{version}-%{release}
 
 %description -n webscalesql-devel%{product_suffix}
 This package contains the development header files and libraries necessary
-to develop MySQL client applications.
+to develop WebScaleSQL client applications.
 
-For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
+For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-shared%{product_suffix}
-Summary:        MySQL - Shared libraries
+Summary:        WebScaleSQL - Shared libraries
 Group:          Applications/Databases
-%if 0%{?commercial}
 Obsoletes:      MySQL-shared
-%else
 Obsoletes:      MySQL-shared-advanced
-%endif
 Obsoletes:      MySQL-shared-standard MySQL-shared-pro
 Obsoletes:      MySQL-shared-pro-cert MySQL-shared-pro-gpl
 Obsoletes:      MySQL-shared-pro-gpl-cert
@@ -413,19 +382,15 @@ Obsoletes:      MySQL-shared-advanced-gpl MySQL-shared-enterprise-gpl
 
 %description -n webscalesql-shared%{product_suffix}
 This package contains the shared libraries (*.so*) which certain languages
-and applications need to dynamically load and use MySQL.
+and applications need to dynamically load and use WebScaleSQL.
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-embedded%{product_suffix}
-Summary:        MySQL - Embedded library
+Summary:        WebScaleSQL - Embedded library
 Group:          Applications/Databases
-%if 0%{?commercial}
-Requires:       MySQL-devel-advanced
-Obsoletes:      MySQL-embedded
-%else
 Requires:       webscalesql-devel
+Obsoletes:      MySQL-embedded
 Obsoletes:      MySQL-embedded-advanced
-%endif
 Obsoletes:      mysql-embedded < %{version}-%{release}
 Obsoletes:      mysql-embedded-advanced
 Obsoletes:      MySQL-embedded-pro
@@ -435,16 +400,16 @@ Provides:       mysql-embedded = %{version}-%{release}
 Provides:       mysql-emdedded%{?_isa} = %{version}-%{release}
 
 %description -n webscalesql-embedded%{product_suffix}
-This package contains the MySQL server as an embedded library.
+This package contains the WebScaleSQL server as an embedded library.
 
-The embedded MySQL server library makes it possible to run a full-featured
-MySQL server inside the client application. The main benefits are increased
+The embedded WebScaleSQL server library makes it possible to run a full-featured
+WebScaleSQL server inside the client application. The main benefits are increased
 speed and more simple management for embedded applications.
 
-The API is identical for the embedded MySQL version and the
+The API is identical for the embedded WebScaleSQL version and the
 client/server version.
 
-For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
+For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
 
 ##############################################################################
 %prep
@@ -456,7 +421,7 @@ For a description of MySQL see the base MySQL RPM or http://www.mysql.com/
 # Fail quickly and obviously if user tries to build as root
 %if %runselftest
     if [ x"`id -u`" = x0 ]; then
-        echo "The MySQL regression tests may fail if run as root."
+        echo "The WebScaleSQL regression tests may fail if run as root."
         echo "If you really need to build the RPM as root, use"
         echo "--define='runselftest 0' to skip the regression tests."
         exit 1
@@ -665,7 +630,7 @@ if [ $? -eq 0 -a -n "$installed" ]; then
     -a "$vendor" != "$myvendor_2" \
     -a "$vendor" != "$myvendor" ]; then
     error_text="$error_text
-The current MySQL server package is provided by a different
+The current WebScaleSQL server package is provided by a different
 vendor ($vendor) than $myoldvendor, $myvendor_2, or $myvendor.
 Some files may be installed to different locations, including log
 files and the service startup script in %{_sysconfdir}/init.d/.
@@ -1061,9 +1026,8 @@ echo "====="                                     >> $STATUS_HISTORY
 %doc release/Docs/INFO_BIN*
 %doc release/support-files/my-default.cnf
 
-%if 0%{?commercial}
+# leave in info file!
 %doc %attr(644, root, root) %{_infodir}/mysql.info*
-%endif
 
 %doc %attr(644, root, man) %{_mandir}/man1/innochecksum.1*
 %doc %attr(644, root, man) %{_mandir}/man1/my_print_defaults.1*
