@@ -1,64 +1,147 @@
 #!/bin/sh
+#
+# build script for WebScaleSQL
+#
+# Usage: build [<webscalesql git directory>]
+#
+# Will store this as a variable if defined in .webscalerc so it
+# can be used on subsequent calls.
+#
+myname=$(basename $0)
+mydir=$(dirname $0)
+if [ $mydir = . ]; then $mydir=$PWD; fi
+
+# build the rpm
+build () {
+	local rc
+	local logfile=$mydir/build.log.$(date +%Y%m%d.%H%M%S)
+
+	# now do the real build.
+	echo "Logging to $logfile"
+
+	# move to build directory
+	cd $specdir
+
+	echo "Building webscalesql rpms..."
+	MYSQL_BUILD_PATH=$DEVTOOLSET_DIR:$PATH \
+	MYSQL_BUILD_CC=$DEVTOOLSET_DIR/gcc \
+	MYSQL_BUILD_CXX=$DEVTOOLSET_DIR/c++ \
+	rpmbuild -ba --define "distro_specific 1" $spec_file 2>&1 | tee -a $logfile
+
+	# check return status
+	rc=$?
+	test -f $logfile && gzip -9 $logfile
+	if [ $rc = 0 ]; then
+		echo "OK: Build completed successfully"
+	else
+		echo "FATAL: Build failed"
+		exit $rc
+	fi
+}
+
+# Copy the local spec file from the webscalesql-rpm directory to rpm's specdir
+copy_spec_file () {
+	if test -e $specdir/$spec_file && cmp -s $spec_file $specdir/$spec_file; then
+		echo "OK: spec file $spec_file is up to date"
+	else
+		echo "Copying spec file $spec_file to $specdir"
+		cp -p $spec_file $specdir/
+	fi
+}
+
+# build a tar ball if needed. FIXME check based on version etc.
+create_tarball () {
+	if test -e $srcdir/$tarball; then
+		echo "OK: tar ball $tarball found in $srcdir"
+	else
+		# build the tar ball if missing
+		echo "Creating tar ball $tarball in $srcdir from ${WSS_HOME}"
+		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $srcdir/$tarball ${WSS_HOME} )
+	fi
+}
+
+# Check if the version/release needs changing and adjust if needed.
+# If changed add a new changelog entry indicating this.
+#
+# Convert the last webscalesql commit timestamp into a value of the
+# form yyyymmdd.hhmmss (FIXME: ignores timezone).
+#
+# Patch the spec file entry and replace the line below. Note the
+# temporary 0. prefix to keep the release number low.
+#%global release         0.20140327.145247
+patch_specfile () {
+	local ts=$(cd $WSS_HOME && git log --date=iso | head | grep Date: | awk '{ print $2 "." $3 }' | sed -e 's/[-:]//g')
+	local spec_ts=$(grep ^%global.release $mydir/$spec_file | sed -e 's/%global release[[:space:]]*//')
+
+	if [ 0.$ts = "$spec_ts" ]; then
+		echo "OK: $mydir/$spec_file has the right %global release value: $spec_ts"
+		rc=1
+	else
+		echo "Patching $mydir/$spec_file with new %global release value: 0.$ts"
+		sed -i -e "/^%global release/ s/$spec_ts/0.$ts/" $mydir/$spec_file
+
+		patch_changelog $ts
+	if
+}
+
+# Patch the spec file's %changelog with the change that has been made.
+# fix me and figure out what to put here.
+# * Sun Mar 30 2014 Simon J Mudd <sjmudd@pobox.com> <version>-<release>
+# - build webscalesql from latest webscalesql commit at $ts
+patch_changelog () {
+	local current_date=$(date +'%a %b %d %Y')
+	local username=$(id -un)
+	local myhostname=$(hostname)
+	local ts=$1
+
+	echo "Adding a new %changelog entry to $mydir/$spec_file"
+	sed -i -e "
+# Add a new changelog entry
+/^%changelog/ {
+a\\
+* $current_date <$username@$myhostname>
+a\\
+- build $wss from latest $wss commit at $ts
+a\\
+ 
+}
+" $mydir/$spec_file
+}
+
+# Location of devtools bin path
+DEVTOOLSET_DIR=/opt/centos/devtoolset-1.1/root/usr/bin
+# setup some default values
+rcfile=$mydir/.webscalesqlrc
+
+# source rc file if found
+test -f $rcfile && . $rcfile
+
+if [ $# = 1 ]; then
+	WSS_HOME=$1
+	test -d $WSS_HOME || msg_fatal "Directory $1 not found"
+	echo "WSS_HOME=$WSS_HOME" > $rcfile
+	msg_info "Writing WSS_HOME to $mrcfile"
+fi
+
+# Check for location of the WebScaleSQL directory
+[ -n "$WSS_HOME" ] ||\
+	msg_fatal "WSS_HOME (directory of webscalesql git tree) unknown"
 
 wss=webscalesql  # long name, too much typing
 wss_version=5.6
-wss_src_dir=${wss}-${wss_version}
 tarball=${wss}-${wss_version}.tar.gz
+specfile=$wss.spec
 
-# other stuff
-git_src_dir=~/git
-rpm_src_dir=~/RPM/SRC/$wss
+# We need to ask rpm for the location of various directories, which
+# may depend on how we have setup ~/.rpmmacros. the %{name} substitution
+# may be needed depending on usage, otherwise it's a noop.
+specdir=$(rpm --eval '%{_specdir}' | sed "s;%{name};$wss;")
+srcdir=$(rpm --eval '%{_srcdir}'   | sed "s;%{name};$wss;")
 
+echo "specdir=$specdir (rpm location of spec files)"
+echo "srcdir=$srcdir (rpm location of source files)"
 
-# create directories if missing
-for d in $rpm_src_dir; do
-	if test -d $d; then
-		echo "OK: Directory $d exists"
-	else
-		echo "Creating directory $d"
-		mkdir $d
-	fi
-done
-
-# copy spec file
-if test -e $rpm_src_dir/$wss_spec && cmp -s $wss.spec $rpm_src_dir/$wss.spec; then
-	echo "OK: spec file $wss.spec is up to date"
-else
-	echo "Copying spec file $wss.spec to $rpm_src_dir"
-	cp -p $wss.spec $rpm_src_dir/
-fi
-
-if test -e $rpm_src_dir/$tarball; then
-	echo "OK: tar ball $tarball found in $rpm_src_dir"
-else
-	# build the tar ball if missing
-	echo "Creating tar ball $tarball in $rpm_src_dir from $git_src_dir/${wss_src_dir}"
-	( cd $git_src_dir && tar cz --exclude-vcs -f $rpm_src_dir/$tarball ${wss_src_dir} )
-fi
-
-# get current location
-mydir=$PWD
-# move to build directory
-cd $rpm_src_dir
-
-# now do the real build.
-logfile=$mydir/build.log.$(date +%Y%m%d.%H%M%S)
-echo "Logging to $logfile"
-
-echo "Building webscalesql..."
-MYSQL_BUILD_PATH=/opt/centos/devtoolset-1.1/root/usr/bin:$PATH \
-MYSQL_BUILD_CC=/opt/centos/devtoolset-1.1/root/usr/bin/gcc \
-MYSQL_BUILD_CXX=/opt/centos/devtoolset-1.1/root/usr/bin/c++ \
-MYSQL_BUILD_CFLAGS= \
-MYSQL_BUILD_CXXFLAGS= \
-MYSQL_BUILD_LDFLAGS= \
-MYSQL_BUILD_CMAKE= \
-MYSQL_BUILD_MAKE_JFLAG= \
-rpmbuild -ba --define "distro_specific 1" $wss.spec 2>&1 | tee -a $logfile
-rc=$?
-test -f $logfile && gzip -9 $logfile
-if [ $rc = 0 ]; then
-	echo "Build completed successfully"
-else
-	echo "Build failed"
-fi
+patch_specfile
+copy_spec_file
+create_tarball
+build
