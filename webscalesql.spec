@@ -96,10 +96,10 @@
 # Server comment strings
 # ----------------------------------------------------------------------------
 %if %{undefined compilation_comment_debug}
-%define compilation_comment_debug       MySQL Community Server - Debug (GPL)
+%define compilation_comment_debug       WebScaleSQL Server - Debug (GPL)
 %endif
 %if %{undefined compilation_comment_release}
-%define compilation_comment_release     MySQL Community Server (GPL)
+%define compilation_comment_release     WebScaleSQL Server (GPL)
 %endif
 
 # ----------------------------------------------------------------------------
