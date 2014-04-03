@@ -1,7 +1,14 @@
-Changes made so this can be built on CentOS 6 using a spec file taken from
-MySQL 5.6.17 (old style rpms on http://dev.mysql.com/downloads/mysql/
+See: http://blog.wl0.org/2014/04/webscalesql-rpms-for-centos-6/
+which describes the build process I started with to build
+WebScaleSQL rpms for CentOS 6.
 
-1. webscalesql requires a new GCC so install the new toolset:
+The build script on this page attempts to simplify the procedure
+so that rpms can be built when any changes get applied to the
+webscalesql-5.6 git repo which is assumed to be on the same server.
+
+Note:
+
+webscalesql requires a new GCC so install the new toolset:
 
 http://people.centos.org/tru/devtools-1.1/readme says:
 
@@ -22,34 +29,23 @@ gcc version 4.7.2 20121015 (Red Hat 4.7.2-5) (GCC)
 
 2. extract spec file with rpm -ivh MySQL-5.6.14-1.el6.src.rpm
 
-3. get my repo....
+3. get my repo: git clone https://github.com/sjmudd/webscalesql-rpm.git
 
-4. my rpm setup is a bit weird (sorry) but is based on the OpenPKG setup
-which I liked:
+The build script has been adjusted to find the right locations for where
+to put the different files needed to build a new rpm.
 
-$ cat ~/.rpmmacros 
-%_topdir        %(echo $HOME)/RPM
-%_sourcedir     %{_topdir}/SRC/%{name}
-%_specdir       %{_topdir}/SRC/%{name}
-%_tmppath       %{_topdir}/TMP
-%_builddir      %{_topdir}/TMP
-%_rpmdir        %{_topdir}/PKG
-%_srcrpmdir     %{_topdir}/PKG
-%_buildroot     %{_topdir}/TMP/%{name}-%{version}-root
-%_rpmfilename   %{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm
-%tmpdir		%{_topdir}/TMP
-%packager       %(echo ${USER}@)%(hostname)
-%distribution   Personal Build
+4. to build
 
-# GNU GPG config below
-%_signature     gpg
-%_gpg_name      Simon J Mudd <sjmudd@pobox.com>
-%_gpg_path      %(echo $HOME)/.gnupg
-
-%debug_package %{nil}
-
-
-5. to build
-
-$ sh build 
+$ sh build [/path/to/webscalesql.git/repo]
 # will take a while and leave a log file in build.log.<timestamp>.gz
+
+The path will be remembered so you only need to add that once. Subsequent
+runs can just call build on its own.
+
+5. If you want to build a new rpm after pulling updates on the webscalesql repo
+just run build again. It should patch the spec file and run the build with the
+new version.  Note: the generated version is based on the time of the last
+git commit to the webscalesql-5.6.git repo (timezone ignored though it should
+not be).
+
+Feedback welcome to Simon J Mudd <sjmudd@pobox.com>
