@@ -12,14 +12,24 @@ webscalesql-5.6 git repo which is assumed to be on the same server.
 
 webscalesql requires a new GCC so install the new toolset:
 
-http://people.centos.org/tru/devtools-1.1/readme says:
+## devtoolset-1.1 (GCC 4.7)
 
 ```
-sudo wget http://people.centos.org/tru/devtools-1.1/devtools-1.1.repo -O /etc/yum.repos.d/devtools-1.1.repo
-sudo yum install devtoolset-1.1
+$ sudo wget http://people.centos.org/tru/devtools-1.1/devtools-1.1.repo -O /etc/yum.repos.d/devtools-1.1.repo
+$ sudo yum install devtoolset-1.1
 ```
 
-# check it looks good.
+or
+
+## devtoolset-2 (GCC 4.8)
+
+```
+$ sudo wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+$ sudo yum install devtoolset-2-binutils devtoolset-2-gcc devtoolset-2-gcc-c++ devtoolset-2-libstdc++-devel devtoolset-2-runtime 
+
+```
+
+## Check it looks good.
 
 ```
 $ scl enable devtoolset-1.1 bash  # notice this just changes the path.
@@ -56,4 +66,4 @@ new version.  Note: the generated version is based on the time of the last
 git commit to the webscalesql-5.6.git repo (timezone ignored though it should
 not be).
 
-Feedback welcome to Simon J Mudd <sjmudd@pobox.com>
+Feedback welcome to Simon J Mudd <sjmudd@pobox.com>.

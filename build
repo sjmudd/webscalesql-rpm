@@ -1,6 +1,22 @@
 #!/bin/sh
 #
-# build script for WebScaleSQL
+# Copyright (c) 2014, Simon J Mudd <sjmudd@pobox.com>. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING. If not, write to the
+# Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston
+# MA  02110-1301  USA.
+#
+# Build script for WebScaleSQL RPMs.
 #
 # Usage: build [<webscalesql git directory>]
 #
@@ -31,12 +47,12 @@ build () {
 	local logfile=$mydir/build.log.$(date +%Y%m%d.%H%M%S)
 
 	# now do the real build.
-	echo "Logging to $logfile"
+	msg_info "Logging to $logfile"
 
 	# move to build directory
 	cd $specdir
 
-	echo "Building webscalesql rpms..."
+	msg_info "Building webscalesql rpms..."
 	MYSQL_BUILD_PATH=$DEVTOOLSET_DIR:$PATH \
 	MYSQL_BUILD_CC=$DEVTOOLSET_DIR/gcc \
 	MYSQL_BUILD_CXX=$DEVTOOLSET_DIR/c++ \
@@ -46,19 +62,18 @@ build () {
 	rc=$?
 	test -f $logfile && gzip -9 $logfile
 	if [ $rc = 0 ]; then
-		echo "OK: Build completed successfully"
+		msg_info "OK: Build completed successfully"
 	else
-		echo "FATAL: Build failed"
-		exit $rc
+		msg_fatal "Build failed"
 	fi
 }
 
 # Copy the local spec file from the webscalesql-rpm directory to rpm's specdir
 copy_spec_file () {
 	if test -e $specdir/$specfile && cmp -s $specfile $specdir/$specfile; then
-		echo "OK: spec file $specfile is up to date"
+		msg_info "OK: spec file $specfile is up to date"
 	else
-		echo "Copying spec file $specfile to $specdir"
+		msg_info "Copying spec file $specfile to $specdir"
 		cp -p $specfile $specdir/
 	fi
 }
@@ -66,10 +81,10 @@ copy_spec_file () {
 # build a tar ball if needed. FIXME check based on version etc.
 create_tarball () {
 	if test -e $sourcedir/$tarball; then
-		echo "OK: tar ball $tarball found in $sourcedir"
+		msg_info "OK: tar ball $tarball found in $sourcedir"
 	else
 		# build the tar ball if missing
-		echo "Creating tar ball $tarball in $sourcedir from ${WSS_HOME}"
+		msg_info "Creating tar ball $tarball in $sourcedir from ${WSS_HOME}"
 		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $sourcedir/$tarball ${WSS_HOME} )
 	fi
 }
@@ -88,10 +103,10 @@ patch_spec_file () {
 	local spec_ts=$(grep ^%global.release $mydir/$specfile | sed -e 's/%global release[[:space:]]*//')
 
 	if [ 0.$ts = "$spec_ts" ]; then
-		echo "OK: $mydir/$specfile has the right %global release value: $spec_ts"
+		msg_info "OK: $mydir/$specfile has the right %global release value: $spec_ts"
 		rc=1
 	else
-		echo "Patching $mydir/$specfile with new %global release value: 0.$ts"
+		msg_info "Patching $mydir/$specfile with new %global release value: 0.$ts"
 		sed -i -e "/^%global release/ s/$spec_ts/0.$ts/" $mydir/$specfile
 
 		patch_changelog $ts
@@ -108,7 +123,7 @@ patch_changelog () {
 	local myhostname=$(hostname)
 	local ts=$1
 
-	echo "Adding a new %changelog entry to $mydir/$specfile"
+	msg_info "Adding a new %changelog entry to $mydir/$specfile"
 	sed -i -e "
 # Add a new changelog entry
 /^%changelog/ {
@@ -122,8 +137,22 @@ a\\
 " $mydir/$specfile
 }
 
+msg_info "WebScaleSQL RPM Builder (C) 2014 Simon J Mudd <sjmudd@pobox.com>"
 # Location of devtools bin path
-DEVTOOLSET_DIR=/opt/centos/devtoolset-1.1/root/usr/bin
+if rpm -q devtoolset-2-gcc >/dev/null 2>&1; then
+	DEVTOOLSET_DIR=/opt/rh/devtoolset-2/root/usr/bin
+	msg_info "DEVTOOLSET_DIR=$DEVTOOLSET_DIR (Using devtoolset-2 for building)"
+elif rpm -q devtoolset-1.1 >/dev/null 2>&1; then
+	DEVTOOLSET_DIR=/opt/centos/devtoolset-1.1/root/usr/bin
+	msg_info "DEVTOOLSET_DIR=$DEVTOOLSET_DIR (Using devtoolset-1.1 for building)"
+else
+	msg_info "WARNING WARNING WARNING WARNING WARNING WARNING WARNING" 
+	msg_info "WARNING: devtoolset rpm does not seem to be installed."
+	msg_info "WARNING: The build of WebScaleSQL may fail."
+	msg_info "WARNING WARNING WARNING WARNING WARNING WARNING WARNING" 
+	sleep 5
+fi
+
 # setup some default values
 rcfile=$mydir/.webscalesqlrc
 
@@ -134,7 +163,7 @@ if [ $# = 1 ]; then
 	WSS_HOME=$1
 	test -d $WSS_HOME ||\
 		msg_fatal "Directory $1 not found"
-	echo "WSS_HOME=$WSS_HOME" > $rcfile
+	msg_info "WSS_HOME=$WSS_HOME" > $rcfile
 	msg_info "Writing WSS_HOME to $rcfile"
 fi
 
@@ -153,8 +182,8 @@ specfile=$wss.spec
 specdir=$(rpm --eval '%{_specdir}'  | sed "s;%{name};$wss;")
 sourcedir=$(rpm --eval '%{_sourcedir}' | sed "s;%{name};$wss;")
 
-echo "specdir=$specdir (rpm location of spec files)"
-echo "sourcedir=$sourcedir (rpm location of source files)"
+msg_info "specdir=$specdir (rpm location of spec files)"
+msg_info "sourcedir=$sourcedir (rpm location of source files)"
 
 patch_spec_file
 copy_spec_file
