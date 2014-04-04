@@ -42,28 +42,35 @@ Configured with: ../configure --prefix=/opt/centos/devtoolset-1.1/root/usr --man
 Thread model: posix
 gcc version 4.7.2 20121015 (Red Hat 4.7.2-5) (GCC) 
 ```
-
-2. Extract spec file with rpm -ivh MySQL-5.6.14-1.el6.src.rpm
-3. Get my repo: git clone https://github.com/sjmudd/webscalesql-rpm.git
-
+- Extract spec file with rpm -ivh MySQL-5.6.14-1.el6.src.rpm
+- Get my repo: git clone https://github.com/sjmudd/webscalesql-rpm.git
 The build script has been adjusted to find the right locations for where
 to put the different files needed to build a new rpm.
-
-4. Build the rpm
-
+- Build the rpm
 ```
 $ sh build [/path/to/webscalesql.git/repo]
 ```
-
 This will take a while and leave a log file in build.log.<timestamp>.gz
 
 The path will be remembered so you only need to add that once. Subsequent
 runs can just call build on its own.
 
-5. If you want to build a new rpm after pulling updates on the webscalesql repo
+- If you want to build a new rpm after pulling updates on the webscalesql repo
 just run build again. It should patch the spec file and run the build with the
 new version.  Note: the generated version is based on the time of the last
 git commit to the webscalesql-5.6.git repo (timezone ignored though it should
 not be).
+
+- performance_schema: This build currently does not include
+performance_schema (default build behaviour). If you have
+performance_schema tables from a previous MySQL-server install the table
+naems will be visible but if you try to select from them you'll get an
+error like this:
+```
+root@myserver [performance_schema]> select * from users;
+ERROR 1286 (42000): Unknown storage engine 'PERFORMANCE_SCHEMA'
+```
+I will try to see if it is possible to build with performance_schema
+enabled, or make this configurable.
 
 Feedback welcome to Simon J Mudd <sjmudd@pobox.com>.
