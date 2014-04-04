@@ -63,8 +63,8 @@ not be).
 
 - performance_schema: This build currently does not include
 performance_schema (default build behaviour). If you have
-performance_schema tables from a previous MySQL-server install the table
-naems will be visible but if you try to select from them you'll get an
+performance_schema tables from a previous MySQL-server install, the table
+names will be visible, but if you try to select from them you'll get an
 error like this:
 ```
 root@myserver [performance_schema]> select * from users;
