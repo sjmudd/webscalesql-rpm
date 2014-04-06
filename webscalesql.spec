@@ -29,7 +29,7 @@
 
 # NOTE: "vendor" is used in upgrade/downgrade check, so you can't
 # change these, has to be exactly as is.
-%global mysql_vendor_1          Oracle and/or its affiliates
+%global mysql_vendor_old        Oracle and/or its affiliates
 %global mysql_vendor            webscalesql.org
 
 # 5.6 for now
@@ -610,7 +610,7 @@ if [ $? -eq 0 -a -n "$installed" ]; then
   vendor=`rpm -q --queryformat='%{VENDOR}' "$installed" 2>&1`
   version=`rpm -q --queryformat='%{VERSION}' "$installed" 2>&1`
   myvendor='%{mysql_vendor}'
-  myvendor_2='%{mysql_vendor_2}'
+  myvendor_old='%{mysql_vendor_old}'
   myversion='%{mysql_version}'
 
   old_family=`echo $version \
@@ -623,11 +623,11 @@ if [ $? -eq 0 -a -n "$installed" ]; then
   [ -z "$new_family" ] && new_family="<bad package specification: version $myversion>"
 
   error_text=
-  if [ "$vendor" != "$myvendor_2" \
+  if [ "$vendor" != "$myvendor_old" \
     -a "$vendor" != "$myvendor" ]; then
     error_text="$error_text
 The current WebScaleSQL server package is provided by a different
-vendor ($vendor) than $myvendor_2, or $myvendor.
+vendor ($vendor) than $myvendor_old, or $myvendor.
 Some files may be installed to different locations, including log
 files and the service startup script in %{_sysconfdir}/init.d/.
 "
