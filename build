@@ -52,11 +52,14 @@ build () {
 	# move to build directory
 	cd $specdir
 
-	msg_info "Building webscalesql rpms..."
-	MYSQL_BUILD_PATH=$DEVTOOLSET_DIR:$PATH \
-	MYSQL_BUILD_CC=$DEVTOOLSET_DIR/gcc \
-	MYSQL_BUILD_CXX=$DEVTOOLSET_DIR/c++ \
-	rpmbuild -ba --define "distro_specific 1" $specfile 2>&1 | tee -a $logfile
+	(
+		set -o pipefail
+		msg_info "Building webscalesql rpms..."
+		MYSQL_BUILD_PATH=$DEVTOOLSET_DIR:$PATH \
+		MYSQL_BUILD_CC=$DEVTOOLSET_DIR/gcc \
+		MYSQL_BUILD_CXX=$DEVTOOLSET_DIR/c++ \
+		rpmbuild -ba --define "distro_specific 1" $specfile 2>&1 | tee -a $logfile
+	)
 
 	# check return status
 	rc=$?
