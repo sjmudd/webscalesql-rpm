@@ -88,7 +88,7 @@ create_tarball () {
 	else
 		# build the tar ball if missing
 		msg_info "Creating tar ball $tarball in $sourcedir from ${WSS_HOME}"
-		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $sourcedir/$tarball ${WSS_HOME} )
+		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $sourcedir/$tarball $(basename ${WSS_HOME}) )
 	fi
 }
 
@@ -182,8 +182,23 @@ specfile=$wss.spec
 # We need to ask rpm for the location of various directories, which
 # may depend on how we have setup ~/.rpmmacros. the %{name} substitution
 # may be needed depending on usage, otherwise it's a noop.
-specdir=$(rpm --eval '%{_specdir}'  | sed "s;%{name};$wss;")
-sourcedir=$(rpm --eval '%{_sourcedir}' | sed "s;%{name};$wss;")
+
+# If I check one directory is there as needed I need to check them all...
+topdir=$(      rpm --eval '%{_topdir}'      )
+specdir=$(     rpm --eval '%{_specdir}'     )
+sourcedir=$(   rpm --eval '%{_sourcedir}'   )
+rpmdir=$(      rpm --eval '%{_rpmdir}'      )
+srcrpmdir=$(   rpm --eval '%{_srcrpmdir}'   )
+buildrootdir=$(rpm --eval '%{_buildrootdir}')
+
+# create needed directories
+msg_info "Checking required rpm build directory tree..."
+for d in $topdir $specdir $sourcedir $rpmdir $srcrpmdir $buildrootdir; do
+	if test -n "$d" -a "$d" != "/" -a ! -d $d; then
+		msg_info "Creating missing directory: $d"
+		mkdir -p $d
+	fi
+done
 
 msg_info "specdir=$specdir (rpm location of spec files)"
 msg_info "sourcedir=$sourcedir (rpm location of source files)"

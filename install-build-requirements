@@ -16,9 +16,9 @@
 # Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston
 # MA  02110-1301  USA.
 #
-# Install devtoolset 1.1 or 2 for CentOS 6
+# Install devtoolset 1.1 or 2 for CentOS 6 and other build requirements.
 #
-# Usage: build [<version>]
+# Usage: install-build-requirements [<version>]
 #
 # possible versions: 1.1 2
 # default version: 2
@@ -65,6 +65,8 @@ case $version in
 2)	packages="devtoolset-2-binutils devtoolset-2-gcc devtoolset-2-gcc-c++ devtoolset-2-libstdc++-devel devtoolset-2-runtime" ;;
 *)	msg_fatal "Unexpected version $version given" ;;
 esac
+# Build Requires packages
+packages="$packages cmake ncurses-devel time zlib-devel libaio-devel readline-devel"
 
 if test -f $yum_dir/$repo_file; then
 	msg_info "OK: $yum_dir/$repo_file already exists"
@@ -73,7 +75,7 @@ else
 	$sudo wget --quiet $base_url/devtools-$version/$repo_file -O $yum_dir/$repo_file
 fi
 
-msg_info "Checking which devtools packages may need to be installed..."
+msg_info "Checking which devtools or build packages may need to be installed..."
 needed=
 for p in $packages; do
 	if rpm -q $p >/dev/null 2>&1; then
@@ -85,8 +87,8 @@ for p in $packages; do
 done
 
 if [ -n "$needed" ]; then
-	msg_info "Installing the following needed devtools packages: $needed"
+	msg_info "Installing the following needed build packages: $needed"
 	$sudo yum install -y $needed
 else
-	msg_info "OK: All required devtools packages are installed"
+	msg_info "OK: All required build packages are installed"
 fi
