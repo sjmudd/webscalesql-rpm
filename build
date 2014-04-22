@@ -166,7 +166,7 @@ if [ $# = 1 ]; then
 	WSS_HOME=$1
 	test -d $WSS_HOME ||\
 		msg_fatal "Directory $1 not found"
-	msg_info "WSS_HOME=$WSS_HOME" > $rcfile
+	echo "WSS_HOME=$WSS_HOME" > $rcfile
 	msg_info "Writing WSS_HOME to $rcfile"
 fi
 
