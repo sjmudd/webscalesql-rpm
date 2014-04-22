@@ -40,7 +40,7 @@
 %global mysqldatadir    /var/lib/mysql
 
 # This should match the last commit timestamp in git in format 0.yyyymmdd.hhmmss
-%global release         0.20140410.113721
+%global release         0.20140410.110242
 
 #
 # Macros we use which are not available in all supported versions of RPM
@@ -1178,6 +1178,9 @@ echo "====="                                     >> $STATUS_HISTORY
 # merging BK trees)
 ##############################################################################
 %changelog
+* Mon Apr 21 2014 <sjmudd@mad12.wl0.org>
+- build webscalesql from latest webscalesql commit at 20140410.110242
+ 
 * Fri Apr 11 2014 <sjmudd@mad12.wl0.org>
 - build webscalesql from latest webscalesql commit at 20140410.113721
  
