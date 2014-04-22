@@ -83,13 +83,13 @@ copy_spec_file () {
 
 # build a tar ball if needed. FIXME check based on version etc.
 create_tarball () {
-	if test -e $sourcedir/$tarball; then
-		msg_info "OK: tar ball $tarball found in $sourcedir"
-	else
+#	if test -e $sourcedir/$tarball; then
+#		msg_info "OK: tar ball $tarball found in $sourcedir"
+#	else
 		# build the tar ball if missing
 		msg_info "Creating tar ball $tarball in $sourcedir from ${WSS_HOME}"
 		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $sourcedir/$tarball $(basename ${WSS_HOME}) )
-	fi
+#	fi
 }
 
 # Check if the version/release needs changing and adjust if needed.
