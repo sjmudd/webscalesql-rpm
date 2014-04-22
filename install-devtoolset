@@ -70,7 +70,7 @@ if test -f $yum_dir/$repo_file; then
 	msg_info "OK: $yum_dir/$repo_file already exists"
 else
 	msg_info "Getting $repo_file from $url/devtools-$version/"
-	$sudo wget $base_url/devtools-$version/$repo_file -O $yum_dir/$repo_file
+	$sudo wget --quiet $base_url/devtools-$version/$repo_file -O $yum_dir/$repo_file
 fi
 
 msg_info "Checking which devtools packages may need to be installed..."
