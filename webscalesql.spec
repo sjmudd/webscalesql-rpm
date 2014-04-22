@@ -32,15 +32,14 @@
 %global mysql_vendor_old        Oracle and/or its affiliates
 %global mysql_vendor            webscalesql.org
 
-# 5.6 for now
-%global mysql_version   5.6
+%global mysql_version   5.6.17.68
 
 %global mysqld_user     mysql
 %global mysqld_group    mysql
 %global mysqldatadir    /var/lib/mysql
 
-# This should match the last commit timestamp in git in format 0.yyyymmdd.hhmmss
-%global release         0.20140410.110242
+%global release         1
+
 
 #
 # Macros we use which are not available in all supported versions of RPM
@@ -83,7 +82,8 @@
 %if %{undefined src_base}
 %define src_base webscalesql
 %endif
-%define src_dir %{src_base}-%{mysql_version}
+# FIXME and use %{mysql_version} instead of 5.6
+%define src_dir %{src_base}-5.6
 
 # ----------------------------------------------------------------------------
 # Feature set (storage engines, options).  Default to community (everything)
@@ -244,7 +244,8 @@ Version:        %{mysql_version}
 Release:        %{release}%{?distro_releasetag:.%{distro_releasetag}}
 Distribution:   %{distro_description}
 License:        GPL v2
-Source:         webscalesql-%{mysql_version}.tar.gz
+# FIXME and use %{mysql_version} instead of 5.6
+Source:         webscalesql-5.6.tar.gz
 URL:            http://www.webscalesql.org/
 Packager:       Simon J Mudd <sjmudd@pobox.com>
 Vendor:         %{mysql_vendor}
@@ -1179,6 +1180,18 @@ echo "====="                                     >> $STATUS_HISTORY
 # merging BK trees)
 ##############################################################################
 %changelog
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17.68
+ 
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17
+ 
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17.68
+ 
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17-68
+ 
 * Mon Apr 21 2014 <sjmudd@mad12.wl0.org>
 - build webscalesql from latest webscalesql commit at 20140410.110242
  
