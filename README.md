@@ -8,13 +8,16 @@ The build script on this page attempts to simplify the procedure
 so that rpms can be built when any changes get applied to the
 webscalesql-5.6 git repo which is assumed to be on the same server.
 
-**Note:**
+**Build Procedure**
 
-webscalesql requires a new GCC so install the one of the toolsets
-needs to be installed:
-
-- devtoolset-1.1 (GCC 4.7)
-- devtoolset-2 (GCC 4.8)
+- Get my webscalesql-rpm.git repo:
+```
+$ git clone https://github.com/sjmudd/webscalesql-rpm.git
+```
+- Install Build requirements
+WebScaleSQL requires a new GCC so one of the following toolsets
+needs to be installed: devtoolset-1.1 (GCC 4.7) or 
+devtoolset-2 (GCC 4.8).
 
 To simplify the devtoolset installation simply run:
 
@@ -25,9 +28,6 @@ $ ./install-build-rquirements
 and this will install this and a few other required packages needed to
 build the rpms.
 
-- Get my repo: git clone https://github.com/sjmudd/webscalesql-rpm.git
-The build script has been adjusted to find the right locations for where
-to put the different files needed to build a new rpm.
 - Build the rpm
 ```
 $ sh build [/path/to/webscalesql.git/repo]
