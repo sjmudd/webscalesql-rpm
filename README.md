@@ -57,4 +57,9 @@ ERROR 1286 (42000): Unknown storage engine 'PERFORMANCE_SCHEMA'
 I will try to see if it is possible to build with performance_schema
 enabled, or make this configurable.
 
+- NOTE on RPMS for CentOS 5
+I had a quick go to build webscalesql rpms for CentOS 5 and found a
+couple of issues. If anyone wants to provide me patches to make this
+work I'll happily incorporate them.
+
 Feedback welcome to Simon J Mudd <sjmudd@pobox.com>.
