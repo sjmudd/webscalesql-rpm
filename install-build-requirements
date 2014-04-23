@@ -66,7 +66,7 @@ case $version in
 *)	msg_fatal "Unexpected version $version given" ;;
 esac
 # Build Requires packages
-packages="$packages rpm-build cmake ncurses-devel time zlib-devel libaio-devel readline-devel"
+packages="$packages cmake libaio-devel ncurses-devel readline-devel rpm-build time zlib-devel"
 
 if test -f $yum_dir/$repo_file; then
 	msg_info "OK: $yum_dir/$repo_file already exists"
