@@ -18,8 +18,11 @@
 # This spec file is based on the MySQL spec file provided by Oracle
 # and used to build MySQL rpms, but modified to build webscalesql.
 #
-# See http:://webscalesql.org/ for more information on WebScaleSQL
-# or my blog site for any updates to this spec file: http://blog.wl0.org/.
+# See http:://webscalesql.org/ for more information on WebScaleSQL.
+#
+# See: https://github.com/sjmudd/webscalesql-rpm/ for more information on
+# building these rpms. My blog site may also be of interest.
+# See: http://blog.wl0.org/.
 #
 # Simon J Mudd <sjmudd@pobox.com>
 
