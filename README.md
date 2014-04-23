@@ -20,6 +20,7 @@ $ cd /some/where/else
 $ git clone https://github.com/webscalesql/webscalesql-5.6.git
 ```
 - Install the build requirements
+
 WebScaleSQL requires a newer GCC than that provided on CentOS 6,
 so one of the following toolsets needs to be installed: devtoolset-1.1
 (GCC 4.7) or devtoolset-2 (GCC 4.8).  By default the required packages
