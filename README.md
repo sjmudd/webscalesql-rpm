@@ -19,8 +19,7 @@ $ git clone https://github.com/sjmudd/webscalesql-rpm.git
 $ cd /some/where/else
 $ git clone https://github.com/webscalesql/webscalesql-5.6.git
 ```
-- Install the build requirements
-
+- Install the build requirements  
 WebScaleSQL requires a newer GCC than that provided on CentOS 6,
 so one of the following toolsets needs to be installed: devtoolset-1.1
 (GCC 4.7) or devtoolset-2 (GCC 4.8).  By default the required packages
@@ -44,10 +43,10 @@ $ ./install-build-rquirements 1.1
 ```
 $ sh build [/path/to/local/webscalesql.git/repo]
 ```
-This will take a while and leave a log file in build.log.<timestamp>.gz
+This will take a while and leave a log file in `build.log.<timestamp>.gz`.
 
 The path will be remembered so you only need to add that once. Subsequent
-runs can just call build on its own.
+runs can just call `build` on its own.
 
 - If you want to build a new rpm after pulling updates on the webscalesql repo
 just run build again. It should patch the spec file and run the build with the
