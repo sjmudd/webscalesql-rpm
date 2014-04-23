@@ -8,69 +8,74 @@ The build script on this page attempts to simplify the procedure
 so that rpms can be built when any changes get applied to the
 webscalesql-5.6 git repo which is assumed to be on the same server.
 
-**Note:**
+**Build Procedure**
 
-webscalesql requires a new GCC so install the new toolset:
+- Get my WebScaleSQL build scripts:
+```
+$ git clone https://github.com/sjmudd/webscalesql-rpm.git
+```
+- Get the WebScaleSQL source:
+```
+$ git clone https://github.com/webscalesql/webscalesql-5.6.git
+```
+- Install the build requirements  
+WebScaleSQL requires a newer GCC than that provided on CentOS 6,
+so one of the following toolsets needs to be installed: devtoolset-1.1
+(GCC 4.7) or devtoolset-2 (GCC 4.8).  By default the required packages
+in devtoolset-2 are installed.
 
-## devtoolset-1.1 (GCC 4.7)
+To simplify the devtoolset installation simply run:
 
 ```
-$ sudo wget http://people.centos.org/tru/devtools-1.1/devtools-1.1.repo -O /etc/yum.repos.d/devtools-1.1.repo
-$ sudo yum install devtoolset-1.1
+$ cd websalesql-rpm
+$ ./install-build-rquirements
 ```
 
-or
-
-## devtoolset-2 (GCC 4.8)
-
-```
-$ sudo wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
-$ sudo yum install devtoolset-2-binutils devtoolset-2-gcc devtoolset-2-gcc-c++ devtoolset-2-libstdc++-devel devtoolset-2-runtime 
+and this will install this and a few other required packages needed to
+build the rpms. If you really want to install devtoolset-1.1 then do
+the following:
 
 ```
-
-## Check it looks good.
-
+$ ./install-build-rquirements 1.1
 ```
-$ scl enable devtoolset-1.1 bash  # notice this just changes the path.
-$ gcc -v                          # show that the new gcc is visible
-Using built-in specs.
-COLLECT_GCC=gcc
-COLLECT_LTO_WRAPPER=/opt/centos/devtoolset-1.1/root/usr/libexec/gcc/x86_64-redhat-linux/4.7.2/lto-wrapper
-Target: x86_64-redhat-linux
-Configured with: ../configure --prefix=/opt/centos/devtoolset-1.1/root/usr --mandir=/opt/centos/devtoolset-1.1/root/usr/share/man --infodir=/opt/centos/devtoolset-1.1/root/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-bootstrap --enable-shared --enable-threads=posix --enable-checking=release --disable-build-with-cxx --disable-build-poststage1-with-cxx --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --enable-languages=c,c++,fortran,lto --enable-plugin --with-linker-hash-style=gnu --enable-initfini-array --disable-libgcj --with-ppl --with-cloog --with-mpc=/home/centos/rpm/BUILD/gcc-4.7.2-20121015/obj-x86_64-redhat-linux/mpc-install --with-tune=generic --with-arch_32=i686 --build=x86_64-redhat-linux
-Thread model: posix
-gcc version 4.7.2 20121015 (Red Hat 4.7.2-5) (GCC) 
-```
-- Extract spec file with rpm -ivh MySQL-5.6.14-1.el6.src.rpm
-- Get my repo: git clone https://github.com/sjmudd/webscalesql-rpm.git
-The build script has been adjusted to find the right locations for where
-to put the different files needed to build a new rpm.
+
 - Build the rpm
 ```
-$ sh build [/path/to/webscalesql.git/repo]
+$ ./build [/path/to/local/webscalesql.git/repo]
 ```
-This will take a while and leave a log file in build.log.<timestamp>.gz
+This will take a while and leave a log file in `build.log.<timestamp>.gz`.
 
 The path will be remembered so you only need to add that once. Subsequent
-runs can just call build on its own.
+runs can just call `build` on its own.
 
 - If you want to build a new rpm after pulling updates on the webscalesql repo
-just run build again. It should patch the spec file and run the build with the
-new version.  Note: the generated version is based on the time of the last
-git commit to the webscalesql-5.6.git repo (timezone ignored though it should
-not be).
+just run `build` again. It will patch `webscalesql.spec` and run the build with the
+new version.
+- Package naming  
+I have now modified the package build procedure to version the
+package name as suggested by Steaphan Greene's in a comment on 11th April 2014.
+See: https://www.facebook.com/groups/webscalesql/?fref=ts.
+Given `rpm` does not like to have hyphens in the version number I have
+replaced this with a period, so for example the last rpm I've built now
+identifies itself as being version 5.6.17.68.  There may be a one-off
+version mismatch in the last digit, but I haven't had time to double
+check. I'm sure someone will correct this if this is wrong.
 
-- performance_schema: This build currently does not include
-performance_schema (default build behaviour). If you have
-performance_schema tables from a previous MySQL-server install, the table
-names will be visible, but if you try to select from them you'll get an
-error like this:
+- performance_schema  
+This build currently does not include performance_schema (default MySQL
+build behaviour). If you have performance_schema tables from a previous
+MySQL-server install, the table names will be visible, but if you try
+to select from them you'll get an error like this:
 ```
 root@myserver [performance_schema]> select * from users;
 ERROR 1286 (42000): Unknown storage engine 'PERFORMANCE_SCHEMA'
 ```
 I will try to see if it is possible to build with performance_schema
 enabled, or make this configurable.
+
+- NOTE on RPMS for CentOS 5
+I had a quick go to build webscalesql rpms for CentOS 5 and found a
+couple of issues. If anyone wants to provide me patches to make this
+work I'll happily incorporate them.
 
 Feedback welcome to Simon J Mudd <sjmudd@pobox.com>.

@@ -83,36 +83,50 @@ copy_spec_file () {
 
 # build a tar ball if needed. FIXME check based on version etc.
 create_tarball () {
-	if test -e $sourcedir/$tarball; then
-		msg_info "OK: tar ball $tarball found in $sourcedir"
-	else
+#	if test -e $sourcedir/$tarball; then
+#		msg_info "OK: tar ball $tarball found in $sourcedir"
+#	else
 		# build the tar ball if missing
 		msg_info "Creating tar ball $tarball in $sourcedir from ${WSS_HOME}"
-		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $sourcedir/$tarball ${WSS_HOME} )
-	fi
+		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $sourcedir/$tarball $(basename ${WSS_HOME}) )
+#	fi
 }
 
 # Check if the version/release needs changing and adjust if needed.
 # If changed add a new changelog entry indicating this.
 #
-# Convert the last webscalesql commit timestamp into a value of the
-# form yyyymmdd.hhmmss (FIXME: ignores timezone).
+# As per message by Steaphan Greene on 11 April at 20:22
+# we name the packages as <mysql_version>-<commits>.
 #
-# Patch the spec file entry and replace the line below. Note the
-# temporary 0. prefix to keep the release number low.
-#%global release         0.20140327.145247
+# However, rpm gets rather upset with - in a version number
+# so I've replaced this with a . instead.
+#
+# Version taken from:
+#[sjmudd@builder webscalesql-5.6]$ git branch
+#* webscalesql-5.6.17
+#
+# so 5.6.17
+#
+# commits taken from:
+#[sjmudd@builder webscalesql-5.6]$ git log | grep -c ^commit
+#68
+# so 68
+#
+# and patch the spec file here.
+#%global mysql_version   5.6.17.68
+#
 patch_spec_file () {
-	local ts=$(cd $WSS_HOME && git log --date=iso | head | grep Date: | awk '{ print $2 "." $3 }' | sed -e 's/[-:]//g')
-	local spec_ts=$(grep ^%global.release $mydir/$specfile | sed -e 's/%global release[[:space:]]*//')
+	local wss_version=$1
 
-	if [ 0.$ts = "$spec_ts" ]; then
-		msg_info "OK: $mydir/$specfile has the right %global release value: $spec_ts"
+	local spec_version=$(grep ^%global.mysql_version $mydir/$specfile | sed -e 's/%global mysql_version[[:space:]]*//')
+	if [ "$wss_version" = "$spec_version" ]; then
+		msg_info "OK: $mydir/$specfile has the right %global mysql_version value: $spec_version"
 		rc=1
 	else
-		msg_info "Patching $mydir/$specfile with new %global release value: 0.$ts"
-		sed -i -e "/^%global release/ s/$spec_ts/0.$ts/" $mydir/$specfile
+		msg_info "Patching $mydir/$specfile with new %global mysql_version value: $wss_version"
+		sed -i -e "/^%global mysql_version/ s/$spec_version/$wss_version/" $mydir/$specfile
 
-		patch_changelog $ts
+		patch_changelog $wss_version
 	fi
 }
 
@@ -124,7 +138,7 @@ patch_changelog () {
 	local current_date=$(date +'%a %b %d %Y')
 	local username=$(id -un)
 	local myhostname=$(hostname)
-	local ts=$1
+	local wss_version=$1
 
 	msg_info "Adding a new %changelog entry to $mydir/$specfile"
 	sed -i -e "
@@ -133,7 +147,7 @@ patch_changelog () {
 a\\
 * $current_date <$username@$myhostname>
 a\\
-- build $wss from latest $wss commit at $ts
+- build $wss from latest $wss commit $wss_version
 a\\
  
 }
@@ -166,7 +180,7 @@ if [ $# = 1 ]; then
 	WSS_HOME=$1
 	test -d $WSS_HOME ||\
 		msg_fatal "Directory $1 not found"
-	msg_info "WSS_HOME=$WSS_HOME" > $rcfile
+	echo "WSS_HOME=$WSS_HOME" > $rcfile
 	msg_info "Writing WSS_HOME to $rcfile"
 fi
 
@@ -176,19 +190,38 @@ fi
 
 wss=webscalesql  # long name, too much typing
 wss_version=5.6
+mysql_version=$(cd $WSS_HOME && git branch | grep webscalesql- | sed -e 's/.*webscalesql-//')
+wss_commits=$(cd $WSS_HOME && git log | grep -c ^commit)
+msg_info "WebScaleSQL base MySQL version: $mysql_version"
+msg_info "WebScaleSQL commits since:      $wss_commits"
 tarball=${wss}-${wss_version}.tar.gz
 specfile=$wss.spec
 
 # We need to ask rpm for the location of various directories, which
 # may depend on how we have setup ~/.rpmmacros. the %{name} substitution
 # may be needed depending on usage, otherwise it's a noop.
-specdir=$(rpm --eval '%{_specdir}'  | sed "s;%{name};$wss;")
-sourcedir=$(rpm --eval '%{_sourcedir}' | sed "s;%{name};$wss;")
+
+# If I check one directory is there as needed I need to check them all...
+topdir=$(      rpm --eval '%{_topdir}'      )
+specdir=$(     rpm --eval '%{_specdir}'     )
+sourcedir=$(   rpm --eval '%{_sourcedir}'   )
+rpmdir=$(      rpm --eval '%{_rpmdir}'      )
+srcrpmdir=$(   rpm --eval '%{_srcrpmdir}'   )
+buildrootdir=$(rpm --eval '%{_buildrootdir}')
+
+# create needed directories
+msg_info "Checking required rpm build directory tree..."
+for d in $topdir $specdir $sourcedir $rpmdir $srcrpmdir $buildrootdir; do
+	if test -n "$d" -a "$d" != "/" -a ! -d $d; then
+		msg_info "Creating missing directory: $d"
+		mkdir -p $d
+	fi
+done
 
 msg_info "specdir=$specdir (rpm location of spec files)"
 msg_info "sourcedir=$sourcedir (rpm location of source files)"
 
-patch_spec_file
+patch_spec_file $mysql_version.$wss_commits
 copy_spec_file
 create_tarball
 build

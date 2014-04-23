@@ -18,8 +18,11 @@
 # This spec file is based on the MySQL spec file provided by Oracle
 # and used to build MySQL rpms, but modified to build webscalesql.
 #
-# See http:://webscalesql.org/ for more information on WebScaleSQL
-# or my blog site for any updates to this spec file: http://blog.wl0.org/.
+# See http:://webscalesql.org/ for more information on WebScaleSQL.
+#
+# See: https://github.com/sjmudd/webscalesql-rpm/ for more information on
+# building these rpms. My blog site may also be of interest.
+# See: http://blog.wl0.org/.
 #
 # Simon J Mudd <sjmudd@pobox.com>
 
@@ -32,15 +35,14 @@
 %global mysql_vendor_old        Oracle and/or its affiliates
 %global mysql_vendor            webscalesql.org
 
-# 5.6 for now
-%global mysql_version   5.6
+%global mysql_version   5.6.17.68
 
 %global mysqld_user     mysql
 %global mysqld_group    mysql
 %global mysqldatadir    /var/lib/mysql
 
-# This should match the last commit timestamp in git in format 0.yyyymmdd.hhmmss
-%global release         0.20140410.113721
+%global release         1
+
 
 #
 # Macros we use which are not available in all supported versions of RPM
@@ -83,7 +85,8 @@
 %if %{undefined src_base}
 %define src_base webscalesql
 %endif
-%define src_dir %{src_base}-%{mysql_version}
+# FIXME and use %{mysql_version} instead of 5.6
+%define src_dir %{src_base}-5.6
 
 # ----------------------------------------------------------------------------
 # Feature set (storage engines, options).  Default to community (everything)
@@ -147,8 +150,9 @@
       %if "%elver" == "6"
         %define distro_description      Oracle Linux 6
         %define distro_releasetag       el6
-        %define distro_buildreq         gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
-        %define distro_requires         chkconfig coreutils grep procps shadow-utils net-tools readline
+        # gcc-c++ and build requirement deliberately removed. FIXME and do this cleanly.
+        %define distro_buildreq                 ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
+        %define distro_requires         chkconfig coreutils grep procps shadow-utils net-tools readline libaio
       %else
         %{error:Oracle Linux %{elver} is unsupported}
       %endif
@@ -170,8 +174,9 @@
             %if "%rhelver" == "6"
               %define distro_description    Red Hat Enterprise Linux 6
               %define distro_releasetag     rhel6
-              %define distro_buildreq       gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
-              %define distro_requires       chkconfig coreutils grep procps shadow-utils net-tools readline
+              # gcc-c++ and build requirement deliberately removed. FIXME and do this cleanly.
+              %define distro_buildreq               ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
+              %define distro_requires       chkconfig coreutils grep procps shadow-utils net-tools readline libaio
             %else
               %{error:Red Hat Enterprise Linux %{rhelver} is unsupported}
             %endif
@@ -243,7 +248,8 @@ Version:        %{mysql_version}
 Release:        %{release}%{?distro_releasetag:.%{distro_releasetag}}
 Distribution:   %{distro_description}
 License:        GPL v2
-Source:         webscalesql-%{mysql_version}.tar.gz
+# FIXME and use %{mysql_version} instead of 5.6
+Source:         webscalesql-5.6.tar.gz
 URL:            http://www.webscalesql.org/
 Packager:       Simon J Mudd <sjmudd@pobox.com>
 Vendor:         %{mysql_vendor}
@@ -1178,6 +1184,21 @@ echo "====="                                     >> $STATUS_HISTORY
 # merging BK trees)
 ##############################################################################
 %changelog
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17.68
+ 
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17
+ 
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17.68
+ 
+* Wed Apr 23 2014 <sjmudd@builder>
+- build webscalesql from latest webscalesql commit 5.6.17-68
+ 
+* Mon Apr 21 2014 <sjmudd@mad12.wl0.org>
+- build webscalesql from latest webscalesql commit at 20140410.110242
+ 
 * Fri Apr 11 2014 <sjmudd@mad12.wl0.org>
 - build webscalesql from latest webscalesql commit at 20140410.113721
  
