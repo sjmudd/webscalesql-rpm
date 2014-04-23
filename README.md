@@ -51,7 +51,7 @@ runs can just call `build` on its own.
 - If you want to build a new rpm after pulling updates on the webscalesql repo
 just run `build` again. It will patch `webscalesql.spec` and run the build with the
 new version.
-- Package naming.  
+- Package naming  
 I have now modified the package build procedure to version the
 package name as suggested by Steaphan Greene's in a comment on 11th April 2014.
 See: https://www.facebook.com/groups/webscalesql/?fref=ts.
@@ -61,11 +61,11 @@ identifies itself as being version 5.6.17.68.  There may be a one-off
 version mismatch in the last digit, but I haven't had time to double
 check. I'm sure someone will correct this if this is wrong.
 
-- performance_schema: This build currently does not include
-performance_schema (default build behaviour). If you have
-performance_schema tables from a previous MySQL-server install, the table
-names will be visible, but if you try to select from them you'll get an
-error like this:
+- performance_schema  
+This build currently does not include performance_schema (default MySQL
+build behaviour). If you have performance_schema tables from a previous
+MySQL-server install, the table names will be visible, but if you try
+to select from them you'll get an error like this:
 ```
 root@myserver [performance_schema]> select * from users;
 ERROR 1286 (42000): Unknown storage engine 'PERFORMANCE_SCHEMA'
