@@ -147,8 +147,9 @@
       %if "%elver" == "6"
         %define distro_description      Oracle Linux 6
         %define distro_releasetag       el6
-        %define distro_buildreq         gcc-c++ ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
-        %define distro_requires         chkconfig coreutils grep procps shadow-utils net-tools readline
+        # gcc-c++ and build requirement deliberately removed. FIXME and do this cleanly.
+        %define distro_buildreq                 ncurses-devel perl time zlib-devel cmake libaio-devel readline-devel
+        %define distro_requires         chkconfig coreutils grep procps shadow-utils net-tools readline libaio
       %else
         %{error:Oracle Linux %{elver} is unsupported}
       %endif
