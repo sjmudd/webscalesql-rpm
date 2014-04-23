@@ -49,12 +49,16 @@ The path will be remembered so you only need to add that once. Subsequent
 runs can just call `build` on its own.
 
 - If you want to build a new rpm after pulling updates on the webscalesql repo
-just run build again. It should patch the spec file and run the build with the
-new version.  Note: the generated version is based on the time of the last
-git commit to the webscalesql-5.6.git repo (timezone ignored though it should
-not be).  I also need to modify the package naming to include the MySQL
-base version and the number of commits that have been applied. See
-Steaphan Greene's comments on 11th April 2014 on https://www.facebook.com/groups/webscalesql/?fref=ts
+just run `build` again. It will patch `webscalesql.spec` and run the build with the
+new version.
+- Package naming. I have now modified the package build procedure to version the
+package name as suggested by Steaphan Greene's in a comment on 11th April 2014.
+See: https://www.facebook.com/groups/webscalesql/?fref=ts.
+Given `rpm` does not like to have hyphens in the version number I have
+replaced this with a period, so for example the last rpm I've built now
+identifies itself as being version 5.6.17.68.  There may be a one-off
+version mismatch in the last digit, but I haven't had time to double
+check. I'm sure someone will correct this if this is wrong.
 
 - performance_schema: This build currently does not include
 performance_schema (default build behaviour). If you have
