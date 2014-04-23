@@ -45,14 +45,15 @@ msg_fatal () {
 
 version=${1:-2}
 
-msg_info "Attempting to install needed devtoolset-$version packages..."
+msg_info "Checking for missing packages needed to build WebScaleSQL" 
+msg_info "Checking for required devtoolset-$version packages..."
 
 # if I'm not root then try to run via sudo
 if [ "$(id -u)" = 0 ]; then
 	msg_info "I'm root so no need for sudo"
 	sudo=
 else
-	msg_info "Will attempt to install devtoolset packages via sudo"
+	msg_info "Will attempt to install missing packages via sudo"
 	sudo=sudo
 fi
 
