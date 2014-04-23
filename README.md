@@ -16,7 +16,6 @@ $ git clone https://github.com/sjmudd/webscalesql-rpm.git
 ```
 - Get the WebScaleSQL source:
 ```
-$ cd /some/where/else
 $ git clone https://github.com/webscalesql/webscalesql-5.6.git
 ```
 - Install the build requirements  
@@ -28,6 +27,7 @@ in devtoolset-2 are installed.
 To simplify the devtoolset installation simply run:
 
 ```
+$ cd websalesql-rpm
 $ ./install-build-rquirements
 ```
 
@@ -41,7 +41,7 @@ $ ./install-build-rquirements 1.1
 
 - Build the rpm
 ```
-$ sh build [/path/to/local/webscalesql.git/repo]
+$ ./build [/path/to/local/webscalesql.git/repo]
 ```
 This will take a while and leave a log file in `build.log.<timestamp>.gz`.
 
@@ -51,7 +51,8 @@ runs can just call `build` on its own.
 - If you want to build a new rpm after pulling updates on the webscalesql repo
 just run `build` again. It will patch `webscalesql.spec` and run the build with the
 new version.
-- Package naming. I have now modified the package build procedure to version the
+- Package naming.  
+I have now modified the package build procedure to version the
 package name as suggested by Steaphan Greene's in a comment on 11th April 2014.
 See: https://www.facebook.com/groups/webscalesql/?fref=ts.
 Given `rpm` does not like to have hyphens in the version number I have
