@@ -90,5 +90,5 @@ if [ -n "$needed" ]; then
 	msg_info "Installing the following needed build packages: $needed"
 	$sudo yum install -y $needed
 else
-	msg_info "OK: All required build packages are installed"
+	msg_info "OK: All required packages needed to build WebScaleSQL are now installed"
 fi
