@@ -16,7 +16,7 @@
 
 # NOTE:
 # This spec file is based on the MySQL spec file provided by Oracle
-# and used to build MySQL rpms, but modified to build webscalesql.
+# and used to build MySQL rpms, but modified to build WebScaleSQL.
 #
 # See http:://webscalesql.org/ for more information on WebScaleSQL.
 #
@@ -31,9 +31,11 @@
 ##############################################################################
 
 # NOTE: "vendor" is used in upgrade/downgrade check, so you can't
-# change these, has to be exactly as is.
-%global mysql_vendor_old        Oracle and/or its affiliates
-%global mysql_vendor            webscalesql.org
+# change these without checking carefully.
+%global vendor_mysql    MySQL AB
+%global vendor_sun      Sun Microsystems, Inc.
+%global vendor_oracle   Oracle and/or its affiliates
+%global vendor_wss      webscalesql.org
 
 %global mysql_version   5.6.17.68
 
@@ -252,7 +254,7 @@ License:        GPL v2
 Source:         webscalesql-5.6.tar.gz
 URL:            http://www.webscalesql.org/
 Packager:       Simon J Mudd <sjmudd@pobox.com>
-Vendor:         %{mysql_vendor}
+Vendor:         %{vendor_wss}
 BuildRequires:  %{distro_buildreq}
 
 # Regression tests may take a long time, override the default to skip them 
@@ -331,7 +333,7 @@ Provides:       mysql%{?_isa} = %{version}-%{release}
 %description -n webscalesql-client%{product_suffix}
 This package contains the standard WebScaleSQL clients and administration tools.
 
-For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
+For a description of WebScaleSQL see the base webscalesql RPM or http://www.webscalesql.org/
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-test%{product_suffix}
@@ -351,7 +353,7 @@ AutoReqProv:    no
 %description -n webscalesql-test%{product_suffix}
 This package contains the WebScaleSQL regression test suite.
 
-For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
+For a description of WebScaleSQL see the base webscalesql RPM or http://www.webscalesql.org/
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-devel%{product_suffix}
@@ -370,7 +372,7 @@ Provides:       mysql-devel%{?_isa} = %{version}-%{release}
 This package contains the development header files and libraries necessary
 to develop WebScaleSQL client applications.
 
-For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
+For a description of WebScaleSQL see the base webscalesql RPM or http://www.webscalesql.org/
 
 # ----------------------------------------------------------------------------
 %package -n webscalesql-shared%{product_suffix}
@@ -413,7 +415,7 @@ speed and more simple management for embedded applications.
 The API is identical for the embedded WebScaleSQL version and the
 client/server version.
 
-For a description of webscalesql see the base webscalesql RPM or http://www.webscalesql.org/
+For a description of WebScaleSQL see the base webscalesql RPM or http://www.webscalesql.org/
 
 ##############################################################################
 %prep
@@ -615,8 +617,12 @@ if [ $? -eq 0 -a -n "$installed" ]; then
   installed=`echo $installed | sed 's/\([^ ]*\) .*/\1/'` # Tests have shown duplicated package names
   vendor=`rpm -q --queryformat='%{VENDOR}' "$installed" 2>&1`
   version=`rpm -q --queryformat='%{VERSION}' "$installed" 2>&1`
-  myvendor='%{mysql_vendor}'
-  myvendor_old='%{mysql_vendor_old}'
+
+  # vendor fun!
+  vendor_mysql='%{vendor_mysql}'
+  vendor_sun='%{vendor_sun}'
+  vendor_wss='%{vendor_wss}'
+  vendor_oracle='%{vendor_oracle}'
   myversion='%{mysql_version}'
 
   old_family=`echo $version \
@@ -629,11 +635,13 @@ if [ $? -eq 0 -a -n "$installed" ]; then
   [ -z "$new_family" ] && new_family="<bad package specification: version $myversion>"
 
   error_text=
-  if [ "$vendor" != "$myvendor_old" \
-    -a "$vendor" != "$myvendor" ]; then
+  if [ "$vendor" != "$vendor_wss" \
+    -a "$vendor" != "$vendor_oracle" \
+    -a "$vendor" != "$vendor_sun" \
+    -a "$vendor" != "$vendor_mysql" ]; then
     error_text="$error_text
 The current WebScaleSQL server package is provided by a different
-vendor ($vendor) than $myvendor_old, or $myvendor.
+vendor ($vendor) than $vendor_wss, $vendor_oracle, $vendor_sun or $vendor_mysql.
 Some files may be installed to different locations, including log
 files and the service startup script in %{_sysconfdir}/init.d/.
 "
@@ -666,8 +674,8 @@ A manual upgrade is required.
   You may choose to use 'rpm --nodeps -ev <package-name>' to remove
   the package which contains the mysqlclient shared library.  The
   library will be reinstalled by the webscalesql-shared-compat package.
-- Install the new MySQL packages supplied by $myvendor
-- Ensure that the MySQL server is started
+- Install the new WebScaleSQL packages supplied by $vendor_wss
+- Ensure that the WebScaleSQL server is started
 - Run the 'mysql_upgrade' program
 
 This is a brief description of the upgrade process.  Important details
