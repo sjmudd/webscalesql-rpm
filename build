@@ -81,15 +81,26 @@ copy_spec_file () {
 	fi
 }
 
-# build a tar ball if needed. FIXME check based on version etc.
+# build a tar ball.
 create_tarball () {
-#	if test -e $sourcedir/$tarball; then
-#		msg_info "OK: tar ball $tarball found in $sourcedir"
-#	else
-		# build the tar ball if missing
-		msg_info "Creating tar ball $tarball in $sourcedir from ${WSS_HOME}"
-		( cd ${WSS_HOME}/.. && tar cz --exclude-vcs -f $sourcedir/$tarball $(basename ${WSS_HOME}) )
-#	fi
+	local wss=$1
+	local mysql_version=$2
+	local wss_commits=$3
+	local tarball=$4
+
+	msg_info "Creating tar ball $tarball in $sourcedir from ${WSS_HOME}"
+	(
+		set -o pipefail
+		cd ${WSS_HOME} && git archive --format=tar --prefix=${wss}-${mysql_version}.${wss_commits}/ HEAD | gzip -9 > $sourcedir/$tarball
+	)
+
+	# check return status
+	rc=$?
+	if [ $rc = 0 ]; then
+		msg_info "OK: tarball created successfully"
+	else
+		msg_fatal "Tarball creation failed"
+	fi
 }
 
 # Check if the version/release needs changing and adjust if needed.
@@ -116,15 +127,18 @@ create_tarball () {
 #%global mysql_version   5.6.17.68
 #
 patch_spec_file () {
-	local wss_version=$1
+	local mysql_version=$1
+	local commits=$1
 
-	local spec_version=$(grep ^%global.mysql_version $mydir/$specfile | sed -e 's/%global mysql_version[[:space:]]*//')
+	local wss_version=$mysql_version.$commits
+
+	local spec_version=$(grep ^%global.webscalesql_version $mydir/$specfile | sed -e 's/%global webscalesql_version[[:space:]]*//')
 	if [ "$wss_version" = "$spec_version" ]; then
 		msg_info "OK: $mydir/$specfile has the right %global mysql_version value: $spec_version"
 		rc=1
 	else
-		msg_info "Patching $mydir/$specfile with new %global mysql_version value: $wss_version"
-		sed -i -e "/^%global mysql_version/ s/$spec_version/$wss_version/" $mydir/$specfile
+		msg_info "Patching $mydir/$specfile with new %global webscale_version value: $wss_version"
+		sed -i -e "/^%global webscalesql_version/ s/$spec_version/$wss_version/" $mydir/$specfile
 
 		patch_changelog $wss_version
 	fi
@@ -194,7 +208,7 @@ mysql_version=$(cd $WSS_HOME && git branch | grep webscalesql- | sed -e 's/.*web
 wss_commits=$(cd $WSS_HOME && git log | grep -c ^commit)
 msg_info "WebScaleSQL base MySQL version: $mysql_version"
 msg_info "WebScaleSQL commits since:      $wss_commits"
-tarball=${wss}-${wss_version}.tar.gz
+tarball=${wss}-${mysql_version}.${wss_commits}.tar.gz
 specfile=$wss.spec
 
 # We need to ask rpm for the location of various directories, which
@@ -203,10 +217,10 @@ specfile=$wss.spec
 
 # If I check one directory is there as needed I need to check them all...
 topdir=$(      rpm --eval '%{_topdir}'      )
-specdir=$(     rpm --eval '%{_specdir}'     )
-sourcedir=$(   rpm --eval '%{_sourcedir}'   )
-rpmdir=$(      rpm --eval '%{_rpmdir}'      )
-srcrpmdir=$(   rpm --eval '%{_srcrpmdir}'   )
+specdir=$(     rpm --eval '%{_specdir}'     | sed -e "s|/%{name}|/$wss|")
+sourcedir=$(   rpm --eval '%{_sourcedir}'   | sed -e "s|/%{name}|/$wss|")
+rpmdir=$(      rpm --eval '%{_rpmdir}'      | sed -e "s|/%{name}|/$wss|")
+srcrpmdir=$(   rpm --eval '%{_srcrpmdir}'   | sed -e "s|/%{name}|/$wss|")
 buildrootdir=$(rpm --eval '%{_buildrootdir}')
 
 # create needed directories
@@ -221,7 +235,7 @@ done
 msg_info "specdir=$specdir (rpm location of spec files)"
 msg_info "sourcedir=$sourcedir (rpm location of source files)"
 
-patch_spec_file $mysql_version.$wss_commits
+patch_spec_file $mysql_version $wss_commits
 copy_spec_file
-create_tarball
+create_tarball $wss $mysql_version $wss_commits $tarball
 build

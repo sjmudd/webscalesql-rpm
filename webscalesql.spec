@@ -37,7 +37,7 @@
 %global vendor_oracle   Oracle and/or its affiliates
 %global vendor_wss      webscalesql.org
 
-%global mysql_version   5.6.17.68
+%global webscalesql_version 5.6.17.68
 
 %global mysqld_user     mysql
 %global mysqld_group    mysql
@@ -87,8 +87,7 @@
 %if %{undefined src_base}
 %define src_base webscalesql
 %endif
-# FIXME and use %{mysql_version} instead of 5.6
-%define src_dir %{src_base}-5.6
+%define src_dir %{src_base}-%{webscalesql_version}
 
 # ----------------------------------------------------------------------------
 # Feature set (storage engines, options).  Default to community (everything)
@@ -246,12 +245,11 @@
 Name:           webscalesql%{product_suffix}
 Summary:        WebScaleSQL: a very fast and reliable SQL database server
 Group:          Applications/Databases
-Version:        %{mysql_version}
+Version:        %{webscalesql_version}
 Release:        %{release}%{?distro_releasetag:.%{distro_releasetag}}
 Distribution:   %{distro_description}
 License:        GPL v2
-# FIXME and use %{mysql_version} instead of 5.6
-Source:         webscalesql-5.6.tar.gz
+Source:         webscalesql-%{webscalesql_version}.tar.gz
 URL:            http://www.webscalesql.org/
 Packager:       Simon J Mudd <sjmudd@pobox.com>
 Vendor:         %{vendor_wss}
@@ -488,7 +486,7 @@ mkdir debug
                   -e 's/ -ip / /' \
                   -e 's/^ //' \
                   -e 's/ $//'`
-  # XXX: MYSQL_UNIX_ADDR should be in cmake/* but mysql_version is included before
+  # XXX: MYSQL_UNIX_ADDR should be in cmake/* but webscalesql_version is included before
   # XXX: install_layout so we can't just set it based on INSTALL_LAYOUT=RPM
   ${CMAKE} ../%{src_dir} -DBUILD_CONFIG=mysql_release -DINSTALL_LAYOUT=RPM \
            -DWITH_INNODB_MEMCACHED=1 -DCMAKE_BUILD_TYPE=Debug \
@@ -504,7 +502,7 @@ mkdir debug
 mkdir release
 (
   cd release
-  # XXX: MYSQL_UNIX_ADDR should be in cmake/* but mysql_version is included before
+  # XXX: MYSQL_UNIX_ADDR should be in cmake/* but webscalesql_version is included before
   # XXX: install_layout so we can't just set it based on INSTALL_LAYOUT=RPM
   ${CMAKE} ../%{src_dir} -DBUILD_CONFIG=mysql_release -DINSTALL_LAYOUT=RPM \
            -DWITH_INNODB_MEMCACHED=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -623,7 +621,7 @@ if [ $? -eq 0 -a -n "$installed" ]; then
   vendor_sun='%{vendor_sun}'
   vendor_wss='%{vendor_wss}'
   vendor_oracle='%{vendor_oracle}'
-  myversion='%{mysql_version}'
+  myversion='%{webscalesql_version}'
 
   old_family=`echo $version \
     | sed -n -e 's,^\([1-9][0-9]*\.[0-9][0-9]*\)\..*$,\1,p'`
@@ -717,7 +715,7 @@ elif [ -n "$SEVERAL_PID_FILES" ] ; then
 	exit 1
 fi
 
-NEW_VERSION=%{mysql_version}-%{release}
+NEW_VERSION=%{webscalesql_version}-%{release}
 
 # The "pre" section code is also run on a first installation,
 # when there  is no data directory yet. Protect against error messages.
@@ -782,7 +780,7 @@ then
   mysql_datadir=%{mysqldatadir}
 fi
 
-NEW_VERSION=%{mysql_version}-%{release}
+NEW_VERSION=%{webscalesql_version}-%{release}
 STATUS_FILE=$mysql_datadir/RPM_UPGRADE_MARKER
 
 # ----------------------------------------------------------------------
@@ -980,7 +978,7 @@ then
   mysql_datadir=%{mysqldatadir}
 fi
 
-NEW_VERSION=%{mysql_version}-%{release}
+NEW_VERSION=%{webscalesql_version}-%{release}
 STATUS_FILE=$mysql_datadir/RPM_UPGRADE_MARKER-LAST  # Note the difference!
 STATUS_HISTORY=$mysql_datadir/RPM_UPGRADE_HISTORY
 
