@@ -128,7 +128,7 @@ create_tarball () {
 #
 patch_spec_file () {
 	local mysql_version=$1
-	local commits=$1
+	local commits=$2
 
 	local wss_version=$mysql_version.$commits
 
