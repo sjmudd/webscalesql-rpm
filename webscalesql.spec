@@ -37,7 +37,7 @@
 %global vendor_oracle   Oracle and/or its affiliates
 %global vendor_wss      webscalesql.org
 
-%global webscalesql_version 5.6.17.69
+%global webscalesql_version 5.6.19.68
 
 %global mysqld_user     mysql
 %global mysqld_group    mysql
@@ -1190,6 +1190,9 @@ echo "====="                                     >> $STATUS_HISTORY
 # merging BK trees)
 ##############################################################################
 %changelog
+* Fri Jun 13 2014 <sjmudd@mad12.wl0.org>
+- build webscalesql from latest webscalesql commit 5.6.19.68
+ 
 * Sun May 11 2014 <sjmudd@mad12.wl0.org>
 - build webscalesql from latest webscalesql commit 5.6.17.69
  
