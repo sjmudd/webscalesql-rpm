@@ -81,7 +81,7 @@ copy_spec_file () {
 	fi
 }
 
-# build a tar ball.
+# build a tar ball, from the head of the branch we are on
 create_tarball () {
 	local wss=$1
 	local mysql_version=$2
@@ -204,7 +204,7 @@ fi
 
 wss=webscalesql  # long name, too much typing
 wss_version=5.6
-mysql_version=$(cd $WSS_HOME && git branch | grep webscalesql- | sed -e 's/.*webscalesql-//')
+mysql_version=$(cd $WSS_HOME && git branch | grep ^\* | grep webscalesql- | sed -e 's/.*webscalesql-//')
 wss_commits=$(cd $WSS_HOME && git log | grep -c ^commit)
 msg_info "WebScaleSQL base MySQL version: $mysql_version"
 msg_info "WebScaleSQL commits since:      $wss_commits"
