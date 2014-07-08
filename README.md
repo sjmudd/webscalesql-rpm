@@ -63,7 +63,8 @@ check. I'm sure someone will correct this if this is wrong.
 
 - performance_schema  
 This build currently does not include performance_schema (default MySQL
-build behaviour). If you have performance_schema tables from a previous
+build behaviour) as this has been disabled by default in WebScaleSQL.
+If you have performance_schema tables from a previous
 MySQL-server install, the table names will be visible, but if you try
 to select from them you'll get an error like this:
 ```
