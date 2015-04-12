@@ -151,7 +151,7 @@ patch_spec_file () {
 patch_changelog () {
 	local current_date=$(date +'%a %b %d %Y')
 	local username=$(id -un)
-	local myhostname=$(hostname)
+	local hostname=$(hostname)
 	local wss_version=$1
 
 	msg_info "Adding a new %changelog entry to $mydir/$specfile"
@@ -159,7 +159,7 @@ patch_changelog () {
 # Add a new changelog entry
 /^%changelog/ {
 a\\
-* $current_date <$username@$myhostname>
+* $current_date <$username@$hostname>
 a\\
 - build $wss from latest $wss commit $wss_version
 a\\
@@ -201,6 +201,15 @@ fi
 # Check for location of the WebScaleSQL directory
 [ -n "$WSS_HOME" ] ||\
 	msg_fatal "WSS_HOME (directory of webscalesql git tree) unknown"
+
+# Allow us to build with performance_schema
+# - the environment variable being set is picked up by the spec file
+if [ -n "$WITH_PERFORMANCE_SCHEMA" ]; then
+	msg_info "Building with performance_schema enabled (as requested)"
+else
+	msg_info "Building with performance_schema disabled (default WebScaleSQL behaviour)"
+	msg_info "( to enable performance_schema set WITH_PERFORMANCE_SCHEMA=1 when calling build )"
+fi
 
 wss=webscalesql  # long name, too much typing
 wss_version=5.6
